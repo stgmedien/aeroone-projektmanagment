@@ -6,6 +6,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="./support.js"></script>
+<script src="/api-client.js"></script>
 </head>
 <body>
 <x-dc>
@@ -597,6 +598,23 @@ class Component extends DCLogic {
     ],
   };
 
+  // ---------- backend bootstrap ----------
+  // Ask the server who is logged in. If a valid session exists, skip the login
+  // screen and map the Google account to its Team person (by email). Degrades
+  // to the local demo if the backend is unreachable.
+  componentDidMount(){
+    if(!window.AeroAPI) return;
+    AeroAPI.me().then(r=>{
+      if(r && r.authed){
+        const email=((r.user&&r.user.email)||'').toLowerCase();
+        this.setState(s=>{
+          const me=s.people.find(p=>(p.email||'').toLowerCase()===email);
+          return { authed:true, currentUserId: me?me.id:s.currentUserId };
+        });
+      }
+    }).catch(()=>{});
+  }
+
   // ---------- helpers ----------
   person(id){ return this.state.people.find(p=>p.id===id); }
   get cu(){ return this.person(this.state.currentUserId) || this.state.people[0]; }
@@ -799,7 +817,7 @@ class Component extends DCLogic {
     const pd=this.state.personDraft||{};
     return {
       isLogin:!this.state.authed, isApp:this.state.authed, loginLoading:this.state.loginLoading, loginIdle:!this.state.loginLoading,
-      onGoogle:()=>{ if(this.state.loginLoading) return; this.setState({loginLoading:true}); setTimeout(()=>this.setState({authed:true,loginLoading:false}),900); },
+      onGoogle:()=>{ if(this.state.loginLoading) return; this.setState({loginLoading:true}); window.location.assign((window.AeroAPI&&AeroAPI.loginUrl)||'/api/auth/google'); },
       onGuest:()=>this.setState({authed:true}),
       stop:(e)=>e.stopPropagation(),
       navBoard:this.navStyle('board'), navTimeline:this.navStyle('timeline'), navCalendar:this.navStyle('calendar'), navCapacity:this.navStyle('capacity'), navTeam:this.navStyle('team'),
