@@ -3,6 +3,7 @@
 import { db } from './_lib/db.js';
 import { requireSession } from './_lib/guard.js';
 import { json, readJsonBody } from './_lib/http.js';
+import { validDeadline } from './_lib/validate.js';
 
 export default async function handler(req, res) {
   const sess = await requireSession(req, res);
@@ -40,7 +41,8 @@ export default async function handler(req, res) {
       }
       for (let i = 0; i < tasks.length; i++) {
         const t = tasks[i];
-        await sql`insert into tasks (id,board_id,deadline,data,position) values (${t.id},${t.boardId || null},${t.deadline || null},${JSON.stringify(t)},${i}) on conflict (id) do nothing`;
+        t.deadline = validDeadline(t.deadline);
+        await sql`insert into tasks (id,board_id,deadline,data,position) values (${t.id},${t.boardId || null},${t.deadline},${JSON.stringify(t)},${i}) on conflict (id) do nothing`;
       }
       return json(res, 200, { seeded: true });
     }

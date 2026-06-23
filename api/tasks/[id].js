@@ -3,6 +3,7 @@
 import { db } from '../_lib/db.js';
 import { requireSession } from '../_lib/guard.js';
 import { json, readJsonBody } from '../_lib/http.js';
+import { validDeadline } from '../_lib/validate.js';
 import { syncTaskToCalendar, deleteEvent } from '../_lib/calendar.js';
 
 export default async function handler(req, res) {
@@ -14,7 +15,8 @@ export default async function handler(req, res) {
   try {
     if (req.method === 'PATCH' || req.method === 'PUT') {
       const t = await readJsonBody(req);
-      await sql`update tasks set board_id=${t.boardId || null}, deadline=${t.deadline || null}, data=${JSON.stringify(t)}, updated_at=now() where id=${id}`;
+      t.deadline = validDeadline(t.deadline);
+      await sql`update tasks set board_id=${t.boardId || null}, deadline=${t.deadline}, data=${JSON.stringify(t)}, updated_at=now() where id=${id}`;
       await syncTaskToCalendar(id);
       return json(res, 200, { ok: true });
     }

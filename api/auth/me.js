@@ -4,12 +4,14 @@
 
 import { readCookies, json } from '../_lib/http.js';
 import { verifySession, SESSION_COOKIE } from '../_lib/session.js';
+import { isAllowedAsync } from '../_lib/allowlist.js';
 import { db } from '../_lib/db.js';
 
 export default async function handler(req, res) {
   const cookies = readCookies(req);
   const sess = await verifySession(cookies[SESSION_COOKIE]);
   if (!sess) return json(res, 200, { authed: false });
+  if (!(await isAllowedAsync(sess.email))) return json(res, 200, { authed: false });
 
   // Which Team person is this account? (users.person_id, else match by email)
   let personId = null;

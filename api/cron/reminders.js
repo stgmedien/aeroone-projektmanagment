@@ -1,11 +1,16 @@
-// GET /api/cron/reminders — runs daily (Vercel Cron). Also callable manually by
-// a logged-in user for testing. Two jobs:
-//   1) Calendar reconcile (pull event reschedules back to tasks); ?backfill=1 also pushes all.
-//   2) Deadline reminders: email/SMS each assignee about tasks due within their window,
-//      de-duplicated via reminder_log so nobody is pinged twice for the same task.
+// GET /api/cron/reminders — runs daily (Vercel Cron). Also triggerable by a
+// logged-in member for testing (debounced; the expensive full backfill is
+// cron-only). Two jobs:
+//   1) Calendar reconcile (pull event reschedules back to tasks); the daily cron
+//      with ?backfill=1 also re-pushes everything.
+//   2) Deadline reminders: email/SMS each assignee about tasks due within their
+//      window, de-duplicated via reminder_log so nobody is pinged twice.
+import { createHash, timingSafeEqual } from 'node:crypto';
 import { db } from '../_lib/db.js';
 import { json, readCookies } from '../_lib/http.js';
 import { verifySession, SESSION_COOKIE } from '../_lib/session.js';
+import { isAllowedAsync } from '../_lib/allowlist.js';
+import { clampInt } from '../_lib/validate.js';
 import { sendEmail, sendSms, brevoConfigured } from '../_lib/brevo.js';
 import { reconcileFromCalendar, backfillAll } from '../_lib/calendar.js';
 
@@ -20,6 +25,14 @@ function normPhone(s) {
   return x.length >= 8 ? x : null;
 }
 const esc = (s) => String(s || '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// Constant-time bearer check (hash both sides to equalize length).
+function bearerOk(header, secret) {
+  if (!secret) return false;
+  const a = createHash('sha256').update(header || '').digest();
+  const b = createHash('sha256').update('Bearer ' + secret).digest();
+  return timingSafeEqual(a, b);
+}
 
 function emailFor(t, p) {
   return {
@@ -40,19 +53,28 @@ function emailFor(t, p) {
 const smsFor = (t) => `Aero One: "${t.title}" ist am ${t.deadline} faellig (Prio ${t.priority}). ${APP_URL}`;
 
 export default async function handler(req, res) {
-  // Auth: Vercel cron Bearer secret, or a logged-in session (manual run).
-  const secret = process.env.CRON_SECRET;
-  let ok = !!secret && (req.headers.authorization || '') === 'Bearer ' + secret;
-  if (!ok) ok = !!(await verifySession(readCookies(req)[SESSION_COOKIE]));
-  if (!ok) return json(res, 401, { error: 'unauthorized' });
+  // Auth: Vercel cron Bearer secret (constant-time), or an allowlisted session.
+  const isCron = bearerOk(req.headers.authorization, process.env.CRON_SECRET);
+  if (!isCron) {
+    const sess = await verifySession(readCookies(req)[SESSION_COOKIE]);
+    if (!sess || !(await isAllowedAsync(sess.email))) return json(res, 401, { error: 'unauthorized' });
+  }
 
+  const sql = db();
   const url = new URL(req.url, 'http://x');
   const out = { calendar: {}, reminders: { email: 0, sms: 0, candidates: 0, brevo: brevoConfigured() } };
-  const sql = db();
 
-  // 1) Calendar reconcile (and optional full backfill).
+  // Debounce manual (session) triggers so the expensive path can't be looped.
+  if (!isCron) {
+    const last = await sql`select value from settings where key='cron_last_run' limit 1`;
+    const lastTs = last[0]?.value ? Number(last[0].value) : 0;
+    if (Date.now() - lastTs < 60000) return json(res, 200, { ok: true, throttled: true });
+  }
+  await sql`insert into settings (key,value) values ('cron_last_run',${String(Date.now())}) on conflict (key) do update set value=excluded.value, updated_at=now()`;
+
+  // 1) Calendar: full re-push only on the scheduled cron (expensive); reconcile pull always.
   try {
-    if (url.searchParams.get('backfill') === '1') out.calendar.push = await backfillAll();
+    if (isCron && url.searchParams.get('backfill') === '1') out.calendar.push = await backfillAll();
     out.calendar.pull = await reconcileFromCalendar();
   } catch (e) {
     console.error('[cron] calendar', e?.message || e);
@@ -74,7 +96,7 @@ export default async function handler(req, res) {
       const rem = t.reminders || {};
       if (!rem.email && !rem.sms) continue;
       const daysUntil = dayNum(t.deadline) - dayNum(today);
-      const windowDays = Math.max(1, Math.round((rem.hoursBefore || 24) / 24));
+      const windowDays = Math.max(1, Math.round(clampInt(rem.hoursBefore, 1, 168, 24) / 24));
       if (daysUntil < 0 || daysUntil > windowDays) continue;
 
       const assignees = (t.assignments || []).map((a) => peopleById[a.personId]).filter(Boolean);
@@ -85,7 +107,7 @@ export default async function handler(req, res) {
           if (!seen.length) {
             try {
               await sendEmail(emailFor(t, p));
-              await sql`insert into reminder_log (task_id,channel,hours_before,recipient) values (${t.id},'email',${rem.hoursBefore || null},${p.email})`;
+              await sql`insert into reminder_log (task_id,channel,hours_before,recipient) values (${t.id},'email',${clampInt(rem.hoursBefore, 1, 168, 24)},${p.email})`;
               out.reminders.email++;
             } catch (e) { console.error('[cron] email', e?.message || e); }
           }
@@ -96,7 +118,7 @@ export default async function handler(req, res) {
           if (!seen.length) {
             try {
               await sendSms({ to: phone, text: smsFor(t) });
-              await sql`insert into reminder_log (task_id,channel,hours_before,recipient) values (${t.id},'sms',${rem.hoursBefore || null},${phone})`;
+              await sql`insert into reminder_log (task_id,channel,hours_before,recipient) values (${t.id},'sms',${clampInt(rem.hoursBefore, 1, 168, 24)},${phone})`;
               out.reminders.sms++;
             } catch (e) { console.error('[cron] sms', e?.message || e); }
           }
@@ -105,8 +127,8 @@ export default async function handler(req, res) {
       }
     }
   } catch (e) {
-    console.error('[cron] reminders', e?.message || e);
-    return json(res, 500, { error: 'cron_failed', message: String(e?.message || e), partial: out });
+    console.error('[cron] reminders', e);
+    return json(res, 500, { error: 'cron_failed' });
   }
 
   return json(res, 200, { ok: true, ...out });

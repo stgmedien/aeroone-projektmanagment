@@ -3,7 +3,7 @@
 // (The Google refresh_token for Calendar is persisted in the database step.)
 
 import { oauthClient } from '../_lib/google.js';
-import { isAllowed } from '../_lib/allowlist.js';
+import { isAllowedAsync } from '../_lib/allowlist.js';
 import { createSession, SESSION_COOKIE, SESSION_MAX_AGE } from '../_lib/session.js';
 import { readCookies, setCookie, clearCookie, baseUrl, redirect } from '../_lib/http.js';
 import { db } from '../_lib/db.js';
@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     });
     const p = ticket.getPayload();
 
-    if (!p || !p.email || !p.email_verified || !isAllowed(p.email)) {
+    if (!p || !p.email || !p.email_verified || !(await isAllowedAsync(p.email))) {
       return redirect(res, '/?error=not_allowed');
     }
 
