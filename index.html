@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+    body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:#FEF7ED;color:#1A1714;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+    input,textarea,select,button{font-family:inherit;color:inherit;}
+    input:focus,textarea:focus,select:focus{outline:2px solid #C96B2E;outline-offset:1px;}
+    ::-webkit-scrollbar{width:11px;height:11px;}
+    ::-webkit-scrollbar-thumb{background:#E2D2BE;border-radius:8px;border:3px solid transparent;background-clip:content-box;}
+    ::-webkit-scrollbar-thumb:hover{background:#D2BFA6;background-clip:content-box;}
+    @keyframes ao-spin{to{transform:rotate(360deg);}}
+    @keyframes ao-fade{from{opacity:0;}to{opacity:1;}}
+    @keyframes ao-pop{from{opacity:0;transform:translateY(10px) scale(.985);}to{opacity:1;transform:translateY(0) scale(1);}}
+    @keyframes ao-slide{from{transform:translateX(100%);}to{transform:translateX(0);}}
+  </style>
+</helmet>
+
+<div style="height:100vh;display:flex;flex-direction:column;overflow:hidden;background:#FEF7ED;color:#1A1714;">
+
+  <!-- ============================ LOGIN ============================ -->
+  <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+    <div style="flex:1;display:flex;min-height:0;">
+      <div style="flex:0 0 44%;background:#1A1714;color:#F3E9DC;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;padding:48px;">
+        <img src="assets/AeroOne_Logo_Small.png" alt="" style="position:absolute;right:-90px;top:50%;transform:translateY(-50%);width:520px;opacity:.07;pointer-events:none;">
+        <div style="display:flex;align-items:center;gap:12px;position:relative;">
+          <img src="assets/AeroOne_Logo_Small.png" alt="Aero One" style="width:34px;height:34px;">
+          <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:21px;letter-spacing:-0.01em;">Aero One</span>
+        </div>
+        <div style="position:relative;max-width:420px;">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:#E0813F;font-weight:600;margin-bottom:18px;">Projektorganisation</div>
+          <h1 style="font-family:'Space Grotesk',sans-serif;font-size:46px;line-height:1.04;font-weight:600;letter-spacing:-0.02em;margin:0 0 18px;">Drohnen&shy;medien in 48&nbsp;Stunden — sauber geplant.</h1>
+          <p style="font-size:16px;line-height:1.6;color:#C7BBAC;margin:0;">Boards, Kapazitäten, Deadlines und Termine für jedes Immobilien- und Architekturprojekt — an einem Ort.</p>
+        </div>
+        <div style="position:relative;display:flex;gap:22px;font-size:13px;color:#9C9183;">
+          <span>Kanban</span><span>Timeline</span><span>Kalender</span><span>Kapazität</span>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:32px;">
+        <div style="width:100%;max-width:380px;animation:ao-pop .5s cubic-bezier(.22,1,.36,1);">
+          <h2 style="font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:600;letter-spacing:-0.02em;margin:0 0 8px;">Willkommen zurück</h2>
+          <p style="font-size:15px;color:#7A7167;margin:0 0 28px;">Melde dich an, um deine Projekte zu planen.</p>
+          <button onClick="{{ onGoogle }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:11px;background:#fff;border:1.5px solid #E6D6C2;border-radius:12px;padding:13px;font-size:15px;font-weight:600;cursor:pointer;color:#1A1714;transition:border-color .15s,box-shadow .15s;" style-hover="border-color:#C96B2E;box-shadow:0 4px 14px rgba(201,107,46,.14);">
+            <sc-if value="{{ loginLoading }}" hint-placeholder-val="{{ false }}">
+              <span style="width:18px;height:18px;border:2px solid #E6D6C2;border-top-color:#C96B2E;border-radius:50%;display:inline-block;animation:ao-spin .7s linear infinite;"></span>
+              <span>Anmeldung läuft…</span>
+            </sc-if>
+            <sc-if value="{{ loginIdle }}" hint-placeholder-val="{{ true }}">
+              <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+              <span>Mit Google anmelden</span>
+            </sc-if>
+          </button>
+          <div style="display:flex;align-items:center;gap:12px;margin:22px 0;color:#A99E90;font-size:12.5px;">
+            <span style="flex:1;height:1px;background:#EBDDCB;"></span>oder<span style="flex:1;height:1px;background:#EBDDCB;"></span>
+          </div>
+          <button onClick="{{ onGuest }}" style="width:100%;background:#FBF1E4;border:1px solid #EBDDCB;border-radius:12px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;color:#5C544B;" style-hover="background:#F6E8D6;">Als Gast die Demo ansehen</button>
+          <p style="font-size:12px;color:#A99E90;margin:24px 0 0;text-align:center;">Prototyp mit Beispieldaten · Google &amp; Brevo simuliert</p>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============================ APP ============================ -->
+  <sc-if value="{{ isApp }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:1;display:flex;min-height:0;">
+
+      <!-- SIDEBAR -->
+      <aside style="flex:0 0 244px;background:#1A1714;color:#B7ADA1;display:flex;flex-direction:column;padding:18px 14px;position:relative;">
+        <div style="display:flex;align-items:center;gap:11px;padding:6px 8px 18px;">
+          <img src="assets/AeroOne_Logo_Small.png" alt="Aero One" style="width:30px;height:30px;">
+          <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:18px;color:#F3E9DC;letter-spacing:-0.01em;">Aero One</span>
+        </div>
+        <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#6E655B;font-weight:600;padding:8px 10px 6px;">Arbeitsbereich</div>
+        <nav style="display:flex;flex-direction:column;gap:3px;">
+          <button onClick="{{ goBoard }}" style="{{ navBoard }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="11" rx="1"/><rect x="17" y="4" width="4" height="14" rx="1"/></svg>Boards</button>
+          <button onClick="{{ goTimeline }}" style="{{ navTimeline }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="14" y2="6"/><line x1="7" y1="12" x2="20" y2="12"/><line x1="5" y1="18" x2="12" y2="18"/></svg>Timeline</button>
+          <button onClick="{{ goCalendar }}" style="{{ navCalendar }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>Kalender</button>
+          <button onClick="{{ goCapacity }}" style="{{ navCapacity }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 18 0"/><line x1="12" y1="12" x2="16" y2="9"/><line x1="3" y1="12" x2="3" y2="12"/></svg>Kapazität</button>
+          <button onClick="{{ goTeam }}" style="{{ navTeam }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 6.2a3 3 0 0 1 0 5.6"/><path d="M17 13.5a5.5 5.5 0 0 1 4 5.5"/></svg>Team</button>
+        </nav>
+
+        <div style="flex:1;"></div>
+
+        <div style="background:#241F1B;border-radius:12px;padding:12px;margin-bottom:12px;">
+          <div style="font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#6E655B;font-weight:600;margin-bottom:9px;">Integrationen</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#C7BBAC;margin-bottom:7px;"><span style="width:7px;height:7px;border-radius:50%;background:#4ED17C;flex:none;"></span>Google Kalender</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#C7BBAC;"><span style="width:7px;height:7px;border-radius:50%;background:#4ED17C;flex:none;"></span>Brevo · E-Mail &amp; SMS</div>
+        </div>
+
+        <button onClick="{{ onToggleUserMenu }}" style="display:flex;align-items:center;gap:10px;width:100%;background:#241F1B;border:1px solid #34302B;border-radius:12px;padding:9px 10px;cursor:pointer;text-align:left;" style-hover="border-color:#4A443D;">
+          <div style="{{ cuAvatarStyle }}">{{ cuInitials }}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:600;color:#F3E9DC;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ cuName }}</div>
+            <div style="font-size:11px;color:#8C8276;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ cuRoleTag }}</div>
+          </div>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8C8276" stroke-width="2"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"/></svg>
+        </button>
+
+        <sc-if value="{{ userMenuOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:14px;right:14px;bottom:70px;background:#fff;color:#1A1714;border-radius:12px;box-shadow:0 16px 40px rgba(0,0,0,.34);padding:7px;z-index:40;animation:ao-pop .18s ease;">
+            <div style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#A99E90;font-weight:700;padding:7px 9px 5px;">Perspektive wechseln</div>
+            <sc-for list="{{ switchList }}" as="u" hint-placeholder-count="5">
+              <button onClick="{{ u.onPick }}" style="{{ u.rowStyle }}">
+                <div style="{{ u.avatarStyle }}">{{ u.initials }}</div>
+                <div style="flex:1;min-width:0;text-align:left;">
+                  <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ u.name }}</div>
+                  <div style="font-size:11px;color:#9A9087;">{{ u.roleTag }}</div>
+                </div>
+                <sc-if value="{{ u.isCurrent }}" hint-placeholder-val="{{ false }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C96B2E" stroke-width="2.5"><path d="M5 12l5 5 9-10"/></svg></sc-if>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+      </aside>
+
+      <!-- MAIN -->
+      <main style="flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;">
+
+        <!-- TOPBAR -->
+        <header style="flex:none;display:flex;align-items:center;gap:16px;padding:14px 26px;background:#FEF7EDcc;backdrop-filter:blur(6px);border-bottom:1px solid #EEE0CF;">
+          <div style="min-width:0;">
+            <h1 style="font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:600;letter-spacing:-0.02em;margin:0;line-height:1.1;">{{ viewTitle }}</h1>
+            <div style="font-size:12.5px;color:#8A8076;margin-top:2px;">{{ viewSubtitle }}</div>
+          </div>
+          <div style="flex:1;"></div>
+          <sc-if value="{{ showSearch }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #EBDDCB;border-radius:10px;padding:8px 12px;width:230px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A99E90" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+              <input value="{{ query }}" onChange="{{ onQuery }}" placeholder="Aufgaben suchen…" style="border:none;background:transparent;font-size:13.5px;width:100%;outline:none;">
+            </div>
+          </sc-if>
+          <div style="display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #EBDDCB;border-radius:10px;padding:7px 11px;font-size:12.5px;color:#5C544B;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#34A853" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+            <span style="white-space:nowrap;">Google Kalender · <span style="color:#34A853;font-weight:600;">verbunden</span></span>
+          </div>
+          <button onClick="{{ onOpenNotifs }}" style="position:relative;background:#fff;border:1px solid #EBDDCB;border-radius:10px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;" style-hover="border-color:#C96B2E;">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#5C544B" stroke-width="2"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+            <sc-if value="{{ hasNotif }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;top:-5px;right:-5px;background:#C96B2E;color:#fff;font-size:10.5px;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid #FEF7ED;">{{ notifCount }}</span></sc-if>
+          </button>
+          <button onClick="{{ onNewTaskTop }}" style="display:inline-flex;align-items:center;gap:7px;background:#C96B2E;color:#fff;border:none;border-radius:10px;padding:10px 15px;font-size:13.5px;font-weight:600;cursor:pointer;white-space:nowrap;" style-hover="background:#B25A23;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Neue Aufgabe
+          </button>
+        </header>
+
+        <!-- PERSPECTIVE BANNER -->
+        <sc-if value="{{ showBanner }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:none;display:flex;align-items:center;gap:10px;background:#FBEBD7;border-bottom:1px solid #F0DCC2;padding:9px 26px;font-size:13px;color:#8A5A12;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>
+            <span>Sicht: <b>{{ cuName }}</b> — es werden nur eigene Aufgaben angezeigt.</span>
+            <button onClick="{{ onBackOrg }}" style="margin-left:auto;background:transparent;border:none;color:#C96B2E;font-weight:700;font-size:13px;cursor:pointer;text-decoration:underline;">Zur Organisator-Sicht</button>
+          </div>
+        </sc-if>
+
+        <!-- CONTENT -->
+        <div style="flex:1;overflow:auto;padding:24px 26px 60px;">
+
+          <!-- ===== KANBAN ===== -->
+          <sc-if value="{{ isBoard }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:22px;">
+              <sc-for list="{{ boards }}" as="board" hint-placeholder-count="2">
+                <section style="background:#fff;border:1px solid #EFE1D0;border-radius:18px;padding:16px 16px 18px;box-shadow:0 1px 2px rgba(26,23,20,.04);">
+                  <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;">
+                    <div style="width:4px;align-self:stretch;border-radius:3px;background:#C96B2E;flex:none;"></div>
+                    <div style="flex:1;min-width:0;">
+                      <input value="{{ board.title }}" onChange="{{ board.onRename }}" style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600;letter-spacing:-0.01em;color:#1A1714;border:1px solid transparent;background:transparent;border-radius:7px;padding:3px 6px;margin:-3px -6px 1px;width:100%;max-width:440px;" style-hover="background:#FBF1E4;" style-focus="background:#FBF1E4;border-color:#E6D6C2;outline:none;">
+                      <div style="font-size:12.5px;color:#8A8076;padding-left:6px;">{{ board.subtitle }}</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;flex:none;">
+                      <span style="font-size:11.5px;font-weight:600;color:#8A8076;background:#FAF1E4;border:1px solid #EFE1D0;border-radius:999px;padding:5px 11px;white-space:nowrap;">{{ board.count }} Aufgaben · {{ board.hoursLabel }}</span>
+                      <button onClick="{{ board.onDelete }}" title="Board entfernen" style="width:30px;height:30px;border-radius:8px;border:1px solid #EFE1D0;background:#fff;color:#B0A99F;cursor:pointer;display:flex;align-items:center;justify-content:center;" style-hover="color:#B3261E;border-color:#F0C8C2;background:#FBEEEC;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div style="display:flex;gap:13px;overflow-x:auto;padding-bottom:6px;align-items:flex-start;">
+                    <sc-for list="{{ board.columns }}" as="col" hint-placeholder-count="4">
+                      <div onDragOver="{{ col.onDragOver }}" onDrop="{{ col.onDrop }}" onDragLeave="{{ col.onDragLeave }}" style="{{ col.style }}">
+                        <div style="display:flex;align-items:center;gap:7px;padding:1px 3px 2px;">
+                          <span style="{{ col.dotStyle }}"></span>
+                          <span style="font-size:12.5px;font-weight:700;color:#3D3730;">{{ col.label }}</span>
+                          <span style="font-size:11.5px;color:#A99E90;font-weight:600;">{{ col.count }}</span>
+                          <span style="flex:1;"></span>
+                          <button onClick="{{ col.onAdd }}" title="Aufgabe hinzufügen" style="width:22px;height:22px;border-radius:6px;border:none;background:transparent;color:#A99E90;cursor:pointer;display:flex;align-items:center;justify-content:center;" style-hover="background:#F2E6D6;color:#C96B2E;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:9px;">
+                          <sc-for list="{{ col.cards }}" as="card" hint-placeholder-count="2">
+                            <div draggable="true" onDragStart="{{ card.onDragStart }}" onDragEnd="{{ card.onDragEnd }}" onClick="{{ card.onClick }}" style="{{ card.style }}" style-hover="box-shadow:0 6px 18px rgba(26,23,20,.10);border-color:#E2CBAE;">
+                              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                                <span style="{{ card.prioStyle }}">{{ card.prioLabel }}</span>
+                                <span style="{{ card.deadlineStyle }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" style="margin-right:3px;vertical-align:-1px;"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>{{ card.deadlineLabel }}</span>
+                              </div>
+                              <div style="font-size:13.5px;font-weight:600;line-height:1.35;color:#1A1714;">{{ card.title }}</div>
+                              <sc-if value="{{ card.showProgress }}" hint-placeholder-val="{{ false }}">
+                                <div style="height:5px;background:#EFE3D4;border-radius:999px;overflow:hidden;"><div style="{{ card.progressStyle }}"></div></div>
+                              </sc-if>
+                              <div style="display:flex;align-items:center;gap:9px;">
+                                <div style="display:flex;align-items:center;">
+                                  <sc-for list="{{ card.assignees }}" as="a" hint-placeholder-count="2"><div style="{{ a.avatarStyle }}" title="{{ a.name }}">{{ a.initials }}</div></sc-for>
+                                </div>
+                                <span style="flex:1;"></span>
+                                <sc-if value="{{ card.hasCl }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex;align-items:center;gap:3px;font-size:11.5px;color:#8A8076;font-weight:600;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7l3 3 4-5"/><path d="M4 17l3 3 4-5"/><line x1="13" y1="6" x2="20" y2="6"/><line x1="13" y1="18" x2="20" y2="18"/></svg>{{ card.clLabel }}</span></sc-if>
+                                <sc-if value="{{ card.hasAttach }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex;align-items:center;gap:3px;font-size:11.5px;color:#8A8076;font-weight:600;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11l-8.5 8.5a4 4 0 0 1-6-6L14 5.5a2.5 2.5 0 0 1 4 3L9.5 17"/></svg>{{ card.attachLabel }}</span></sc-if>
+                                <span style="display:inline-flex;align-items:center;gap:3px;font-size:11.5px;color:#C96B2E;font-weight:700;">{{ card.hoursLabel }}</span>
+                              </div>
+                            </div>
+                          </sc-for>
+                          <sc-if value="{{ col.isEmpty }}" hint-placeholder-val="{{ false }}">
+                            <div style="border:1.5px dashed #E2D2BE;border-radius:10px;padding:14px;text-align:center;font-size:11.5px;color:#B0A99F;">Karte hierher ziehen</div>
+                          </sc-if>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </section>
+              </sc-for>
+              <button onClick="{{ onAddBoard }}" style="align-self:flex-start;display:inline-flex;align-items:center;gap:8px;background:transparent;border:1.5px dashed #D8C4A9;border-radius:12px;padding:12px 18px;font-size:14px;font-weight:600;color:#9A7B53;cursor:pointer;" style-hover="border-color:#C96B2E;color:#C96B2E;background:#FBF1E4;">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Neues Board
+              </button>
+            </div>
+          </sc-if>
+
+          <!-- ===== TIMELINE ===== -->
+          <sc-if value="{{ isTimeline }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#fff;border:1px solid #EFE1D0;border-radius:16px;padding:18px;box-shadow:0 1px 2px rgba(26,23,20,.04);min-width:760px;">
+              <div style="display:flex;margin-bottom:6px;">
+                <div style="flex:0 0 230px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#A99E90;font-weight:700;padding-left:4px;align-self:center;">Aufgabe</div>
+                <div style="flex:1;display:flex;">
+                  <sc-for list="{{ tl.weeks }}" as="w" hint-placeholder-count="4"><div style="flex:1;border-left:1px solid #EFE1D0;padding:2px 0 6px 8px;"><div style="font-size:12px;font-weight:700;color:#3D3730;">{{ w.label }}</div><div style="font-size:11px;color:#A99E90;">{{ w.sub }}</div></div></sc-for>
+                </div>
+              </div>
+              <sc-for list="{{ tl.groups }}" as="g" hint-placeholder-count="3">
+                <div style="margin-top:10px;">
+                  <div style="font-family:'Space Grotesk',sans-serif;font-size:13.5px;font-weight:600;color:#C96B2E;padding:4px 0 6px;border-top:1px solid #F2E7D8;">{{ g.title }}</div>
+                  <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3">
+                    <div style="display:flex;align-items:center;min-height:36px;">
+                      <div style="flex:0 0 230px;padding-right:12px;font-size:13px;font-weight:500;color:#3D3730;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ it.title }}</div>
+                      <div style="flex:1;position:relative;height:30px;background:repeating-linear-gradient(90deg,#FBF4EA 0 calc(25% - 1px),#EFE1D0 calc(25% - 1px) 25%);border-radius:6px;">
+                        <div style="{{ tl.todayStyle }}"></div>
+                        <div onClick="{{ it.onClick }}" style="{{ it.barStyle }}" title="{{ it.title }}"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:10.5px;font-weight:700;color:#fff;white-space:nowrap;">{{ it.assignee }}</span></div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-for>
+              <div style="display:flex;align-items:center;gap:16px;margin-top:16px;padding-top:12px;border-top:1px solid #F2E7D8;font-size:12px;color:#8A8076;">
+                <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:14px;height:8px;border-radius:3px;background:#B0481F;"></span>Hoch</span>
+                <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:14px;height:8px;border-radius:3px;background:#8A5A12;"></span>Mittel</span>
+                <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:14px;height:8px;border-radius:3px;background:#6B635B;"></span>Niedrig</span>
+                <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:2px;height:14px;background:#C96B2E;"></span>Heute</span>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ===== CALENDAR ===== -->
+          <sc-if value="{{ isCalendar }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#fff;border:1px solid #EFE1D0;border-radius:16px;padding:18px;box-shadow:0 1px 2px rgba(26,23,20,.04);">
+              <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+                <h2 style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:600;margin:0;letter-spacing:-0.01em;">{{ cal.monthLabel }}</h2>
+                <div style="display:flex;gap:6px;">
+                  <button onClick="{{ cal.onPrev }}" style="width:32px;height:32px;border-radius:8px;border:1px solid #EBDDCB;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#5C544B;" style-hover="border-color:#C96B2E;color:#C96B2E;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6"/></svg></button>
+                  <button onClick="{{ cal.onNext }}" style="width:32px;height:32px;border-radius:8px;border:1px solid #EBDDCB;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#5C544B;" style-hover="border-color:#C96B2E;color:#C96B2E;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg></button>
+                </div>
+                <span style="flex:1;"></span>
+                <span style="display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:#34A853;background:#E9F6EE;border:1px solid #CDEBD7;border-radius:999px;padding:6px 12px;font-weight:600;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>Synchronisiert mit Google Kalender</span>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;">
+                <sc-for list="{{ cal.weekdays }}" as="wd" hint-placeholder-count="7"><div style="font-size:11.5px;font-weight:700;color:#A99E90;text-transform:uppercase;letter-spacing:.08em;padding-left:4px;">{{ wd }}</div></sc-for>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <sc-for list="{{ cal.weeks }}" as="week" hint-placeholder-count="6">
+                  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;">
+                    <sc-for list="{{ week }}" as="day" hint-placeholder-count="7">
+                      <div style="{{ day.cellStyle }}">
+                        <div style="{{ day.numStyle }}">{{ day.num }}</div>
+                        <div style="display:flex;flex-direction:column;gap:3px;margin-top:3px;">
+                          <sc-for list="{{ day.tasks }}" as="t" hint-placeholder-count="2">
+                            <div onClick="{{ t.onClick }}" style="{{ t.chipStyle }}" title="{{ t.title }}"><span style="{{ t.dotStyle }}"></span><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ t.title }}</span></div>
+                          </sc-for>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- ===== CAPACITY ===== -->
+          <sc-if value="{{ isCapacity }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:18px;">
+              <div style="display:flex;gap:14px;flex-wrap:wrap;">
+                <div style="flex:1;min-width:170px;background:#fff;border:1px solid #EFE1D0;border-radius:14px;padding:16px;"><div style="font-size:12px;color:#8A8076;font-weight:600;">Team-Kapazität / Woche</div><div style="font-family:'Space Grotesk',sans-serif;font-size:30px;font-weight:600;margin-top:4px;">{{ cap.capSum }} h</div></div>
+                <div style="flex:1;min-width:170px;background:#fff;border:1px solid #EFE1D0;border-radius:14px;padding:16px;"><div style="font-size:12px;color:#8A8076;font-weight:600;">Verplant</div><div style="font-family:'Space Grotesk',sans-serif;font-size:30px;font-weight:600;margin-top:4px;color:#C96B2E;">{{ cap.plSum }} h <span style="font-size:15px;color:#A99E90;">· {{ cap.utilSum }}%</span></div></div>
+                <div style="flex:1;min-width:170px;background:#fff;border:1px solid #EFE1D0;border-radius:14px;padding:16px;"><div style="font-size:12px;color:#8A8076;font-weight:600;">Frei</div><div style="font-family:'Space Grotesk',sans-serif;font-size:30px;font-weight:600;margin-top:4px;">{{ cap.freeSum }} h</div></div>
+              </div>
+              <div style="background:#fff;border:1px solid #EFE1D0;border-radius:16px;padding:8px;box-shadow:0 1px 2px rgba(26,23,20,.04);">
+                <sc-for list="{{ cap.rows }}" as="r" hint-placeholder-count="5">
+                  <div style="{{ r.rowStyle }}">
+                    <div style="{{ r.avatarStyle }}">{{ r.initials }}</div>
+                    <div style="flex:0 0 188px;min-width:0;">
+                      <div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.name }}</div>
+                      <div style="font-size:12px;color:#8A8076;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.role }}</div>
+                    </div>
+                    <div style="flex:1;min-width:120px;">
+                      <div style="height:10px;background:#EFE3D4;border-radius:999px;overflow:hidden;"><div style="{{ r.barStyle }}"></div></div>
+                    </div>
+                    <div style="flex:0 0 130px;text-align:right;"><span style="{{ r.utilStyle }}">{{ r.planned }} / {{ r.capacity }} h</span><span style="font-size:12px;color:#A99E90;margin-left:6px;">{{ r.util }}%</span></div>
+                    <div style="flex:0 0 96px;text-align:right;font-size:12px;color:#8A8076;">{{ r.tcount }} Aufgaben</div>
+                  </div>
+                </sc-for>
+              </div>
+              <p style="font-size:12.5px;color:#9A9087;margin:0;max-width:none;">Stunden werden automatisch aus den zugewiesenen Aufgaben zurückgeschrieben — passt du in einer Karte die Stunden an, aktualisiert sich diese Planung sofort.</p>
+            </div>
+          </sc-if>
+
+          <!-- ===== TEAM ===== -->
+          <sc-if value="{{ isTeam }}" hint-placeholder-val="{{ false }}">
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;">
+              <sc-for list="{{ teamCards }}" as="p" hint-placeholder-count="5">
+                <div style="background:#fff;border:1px solid #EFE1D0;border-radius:16px;padding:18px;box-shadow:0 1px 2px rgba(26,23,20,.04);">
+                  <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+                    <div style="{{ p.avatarStyle }}">{{ p.initials }}</div>
+                    <div style="flex:1;min-width:0;"><div style="font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ p.name }}</div><div style="font-size:12.5px;color:#8A8076;">{{ p.role }}</div></div>
+                    <sc-if value="{{ p.isOrg }}" hint-placeholder-val="{{ false }}"><span style="font-size:10.5px;font-weight:700;color:#C96B2E;background:#F8E6D0;border-radius:999px;padding:4px 9px;">Organisator</span></sc-if>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;font-size:12.5px;color:#8A8076;margin-bottom:6px;"><span>Auslastung</span><span style="{{ p.utilStyle }}">{{ p.planned }} / {{ p.capacity }} h · {{ p.util }}%</span></div>
+                  <div style="height:8px;background:#EFE3D4;border-radius:999px;overflow:hidden;margin-bottom:14px;"><div style="{{ p.barStyle }}"></div></div>
+                  <div style="display:flex;flex-direction:column;gap:7px;font-size:12.5px;color:#5C544B;">
+                    <div style="display:flex;align-items:center;gap:8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A99E90" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>{{ p.email }}</div>
+                    <div style="display:flex;align-items:center;gap:8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A99E90" stroke-width="2"><path d="M5 4h4l2 5-3 2a12 12 0 0 0 5 5l2-3 5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>{{ p.phone }}</div>
+                  </div>
+                  <button onClick="{{ p.onEdit }}" style="margin-top:14px;width:100%;background:#FBF1E4;border:1px solid #EBDDCB;border-radius:9px;padding:9px;font-size:13px;font-weight:600;color:#5C544B;cursor:pointer;" style-hover="background:#F6E8D6;border-color:#C96B2E;color:#C96B2E;">Bearbeiten</button>
+                </div>
+              </sc-for>
+              <button onClick="{{ onAddPerson }}" style="min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:transparent;border:1.5px dashed #D8C4A9;border-radius:16px;color:#9A7B53;font-size:14px;font-weight:600;cursor:pointer;" style-hover="border-color:#C96B2E;color:#C96B2E;background:#FBF1E4;">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.4"/><path d="M3.5 20a6 6 0 0 1 11 0"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg>Person hinzufügen
+              </button>
+            </div>
+          </sc-if>
+
+        </div>
+      </main>
+    </div>
+
+    <!-- ============== TASK DETAIL MODAL ============== -->
+    <sc-if value="{{ showModal }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ m.onClose }}" style="position:fixed;inset:0;background:rgba(26,23,20,.42);display:flex;align-items:center;justify-content:center;padding:28px;z-index:60;animation:ao-fade .18s ease;">
+        <div onClick="{{ stop }}" style="width:100%;max-width:780px;max-height:88vh;background:#fff;border-radius:18px;box-shadow:0 30px 70px rgba(0,0,0,.34);display:flex;flex-direction:column;overflow:hidden;animation:ao-pop .24s cubic-bezier(.22,1,.36,1);">
+          <div style="display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid #EEE0CF;">
+            <span style="font-size:11.5px;font-weight:700;color:#C96B2E;background:#F8E6D0;border-radius:999px;padding:5px 11px;">{{ m.boardTitle }}</span>
+            <span style="flex:1;"></span>
+            <button onClick="{{ m.onDelete }}" title="Aufgabe löschen" style="width:34px;height:34px;border-radius:9px;border:1px solid #EFE1D0;background:#fff;color:#B0A99F;cursor:pointer;display:flex;align-items:center;justify-content:center;" style-hover="color:#B3261E;border-color:#F0C8C2;background:#FBEEEC;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>
+            <button onClick="{{ m.onClose }}" style="width:34px;height:34px;border-radius:9px;border:1px solid #EFE1D0;background:#fff;color:#5C544B;cursor:pointer;display:flex;align-items:center;justify-content:center;" style-hover="background:#FBF1E4;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+          </div>
+          <div style="flex:1;overflow:auto;display:flex;flex-wrap:wrap;">
+            <div style="flex:1.5;min-width:300px;padding:20px;display:flex;flex-direction:column;gap:18px;">
+              <input value="{{ m.title }}" onChange="{{ m.onTitle }}" style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;letter-spacing:-0.01em;border:1px solid transparent;border-radius:9px;padding:6px 9px;margin:-6px -9px;background:transparent;" style-hover="background:#FBF1E4;" style-focus="background:#FBF1E4;border-color:#E6D6C2;outline:none;">
+              <div>
+                <div style="font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#A99E90;margin-bottom:7px;">Beschreibung</div>
+                <textarea value="{{ m.desc }}" onChange="{{ m.onDesc }}" placeholder="Beschreibung hinzufügen…" style="width:100%;min-height:74px;resize:vertical;border:1px solid #EBDDCB;border-radius:10px;padding:11px;font-size:13.5px;line-height:1.55;background:#FDFAF5;"></textarea>
+              </div>
+              <div>
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;"><span style="font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#A99E90;">Checkliste</span><span style="font-size:11.5px;color:#C96B2E;font-weight:700;">{{ m.clDone }}/{{ m.clTotal }}</span></div>
+                <div style="display:flex;flex-direction:column;gap:7px;">
+                  <sc-for list="{{ m.checklist }}" as="c" hint-placeholder-count="2">
+                    <div style="display:flex;align-items:center;gap:9px;">
+                      <button onClick="{{ c.onToggle }}" style="{{ c.boxStyle }}"><sc-if value="{{ c.done }}" hint-placeholder-val="{{ false }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12l5 5 9-10"/></svg></sc-if></button>
+                      <span style="{{ c.textStyle }}">{{ c.text }}</span>
+                      <button onClick="{{ c.onRemove }}" style="margin-left:auto;background:transparent;border:none;color:#C7BEB3;cursor:pointer;font-size:16px;line-height:1;padding:2px 4px;" style-hover="color:#B3261E;">×</button>
+                    </div>
+                  </sc-for>
+                  <div style="display:flex;gap:8px;margin-top:3px;">
+                    <input value="{{ m.newClText }}" onChange="{{ m.onClInput }}" onKeyDown="{{ m.onClKey }}" placeholder="Punkt hinzufügen…" style="flex:1;border:1px solid #EBDDCB;border-radius:8px;padding:8px 10px;font-size:13px;background:#FDFAF5;">
+                    <button onClick="{{ m.onAddCl }}" style="background:#FBF1E4;border:1px solid #EBDDCB;border-radius:8px;padding:0 14px;font-size:13px;font-weight:600;color:#C96B2E;cursor:pointer;" style-hover="background:#F6E8D6;">Hinzufügen</button>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#A99E90;margin-bottom:9px;">Dateianhänge</div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                  <sc-for list="{{ m.attachments }}" as="f" hint-placeholder-count="1">
+                    <div style="display:flex;align-items:center;gap:8px;background:#FBF1E4;border:1px solid #EBDDCB;border-radius:9px;padding:7px 10px;">
+                      <span style="font-size:9.5px;font-weight:700;color:#fff;background:#C96B2E;border-radius:5px;padding:3px 5px;letter-spacing:.04em;">{{ f.icon }}</span>
+                      <div style="min-width:0;"><div style="font-size:12.5px;font-weight:600;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ f.name }}</div><div style="font-size:11px;color:#A99E90;">{{ f.meta }}</div></div>
+                      <button onClick="{{ f.onRemove }}" style="background:transparent;border:none;color:#C7BEB3;cursor:pointer;font-size:16px;line-height:1;padding:0 2px;" style-hover="color:#B3261E;">×</button>
+                    </div>
+                  </sc-for>
+                  <label style="display:inline-flex;align-items:center;gap:7px;border:1.5px dashed #D8C4A9;border-radius:9px;padding:9px 13px;font-size:12.5px;font-weight:600;color:#9A7B53;cursor:pointer;" style-hover="border-color:#C96B2E;color:#C96B2E;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11l-8.5 8.5a4 4 0 0 1-6-6L14 5.5a2.5 2.5 0 0 1 4 3L9.5 17"/></svg>Datei anhängen
+                    <input type="file" multiple onChange="{{ m.onAddFile }}" style="display:none;">
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div style="flex:1;min-width:240px;background:#FBF6EE;border-left:1px solid #EEE0CF;padding:20px;display:flex;flex-direction:column;gap:16px;">
+              <div>
+                <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#A99E90;margin-bottom:6px;">Status</div>
+                <select value="{{ m.status }}" onChange="{{ m.onStatus }}" style="width:100%;border:1px solid #EBDDCB;border-radius:9px;padding:9px 10px;font-size:13.5px;font-weight:600;background:#fff;cursor:pointer;"><option value="todo">To Do</option><option value="doing">In Arbeit</option><option value="review">Review</option><option value="done">Erledigt</option></select>
+              </div>
+              <div>
+                <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#A99E90;margin-bottom:6px;">Board</div>
+                <select value="{{ m.boardId }}" onChange="{{ m.onBoard }}" style="width:100%;border:1px solid #EBDDCB;border-radius:9px;padding:9px 10px;font-size:13.5px;font-weight:600;background:#fff;cursor:pointer;"><sc-for list="{{ m.boardsList }}" as="b" hint-placeholder-count="3"><option value="{{ b.id }}">{{ b.title }}</option></sc-for></select>
+              </div>
+              <div style="display:flex;gap:12px;">
+                <div style="flex:1;"><div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#A99E90;margin-bottom:6px;">Priorität</div><select value="{{ m.priority }}" onChange="{{ m.onPriority }}" style="width:100%;border:1px solid #EBDDCB;border-radius:9px;padding:9px 10px;font-size:13.5px;font-weight:600;background:#fff;cursor:pointer;"><option value="hoch">Hoch</option><option value="mittel">Mittel</option><option value="niedrig">Niedrig</option></select></div>
+              </div>
+              <div>
+                <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#A99E90;margin-bottom:6px;">Deadline <span style="color:#C96B2E;">*</span></div>
+                <input type="date" value="{{ m.deadline }}" onChange="{{ m.onDeadline }}" style="width:100%;border:1px solid #EBDDCB;border-radius:9px;padding:9px 10px;font-size:13.5px;font-weight:600;background:#fff;">
+                <div style="{{ m.deadlineState }}">{{ m.deadlineMeta }}</div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#A99E90;margin-bottom:6px;"><span>Fortschritt</span><span style="color:#C96B2E;">{{ m.progress }}%</span></div>
+                <input type="range" min="0" max="100" step="5" value="{{ m.progress }}" onChange="{{ m.onProgress }}" style="width:100%;accent-color:#C96B2E;cursor:pointer;">
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#A99E90;">Zugewiesen</span><span style="font-size:11.5px;font-weight:700;color:#C96B2E;">{{ m.totalHours }} h gesamt</span></div>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                  <sc-for list="{{ m.assigned }}" as="a" hint-placeholder-count="1">
+                    <div style="display:flex;align-items:center;gap:9px;background:#fff;border:1px solid #EBDDCB;border-radius:9px;padding:7px 9px;">
+                      <div style="{{ a.avatarStyle }}">{{ a.initials }}</div>
+                      <div style="flex:1;min-width:0;"><div style="font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ a.name }}</div></div>
+                      <input type="number" min="0" value="{{ a.hours }}" onChange="{{ a.onHours }}" style="width:48px;border:1px solid #EBDDCB;border-radius:7px;padding:5px;font-size:12.5px;font-weight:700;text-align:center;color:#C96B2E;">
+                      <span style="font-size:11.5px;color:#A99E90;">h</span>
+                      <button onClick="{{ a.onRemove }}" style="background:transparent;border:none;color:#C7BEB3;cursor:pointer;font-size:16px;line-height:1;padding:0 2px;" style-hover="color:#B3261E;">×</button>
+                    </div>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ m.hasAvail }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;">
+                    <sc-for list="{{ m.avail }}" as="a" hint-placeholder-count="3">
+                      <button onClick="{{ a.onAdd }}" style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #EBDDCB;border-radius:999px;padding:4px 10px 4px 4px;font-size:12px;font-weight:600;color:#5C544B;cursor:pointer;" style-hover="border-color:#C96B2E;color:#C96B2E;"><div style="{{ a.avatarStyle }}">{{ a.initials }}</div>{{ a.name }}</button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+              <div style="border-top:1px solid #EEE0CF;padding-top:14px;">
+                <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#A99E90;margin-bottom:9px;">Erinnerungen · Brevo</div>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                  <button onClick="{{ m.onREmail }}" style="{{ m.emailStyle }}"><span style="display:flex;align-items:center;gap:8px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>E-Mail</span><span style="{{ m.emailDot }}"></span></button>
+                  <button onClick="{{ m.onRSms }}" style="{{ m.smsStyle }}"><span style="display:flex;align-items:center;gap:8px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-11.5 7.2L3 21l1.8-6.5A8 8 0 1 1 21 12z"/></svg>SMS</span><span style="{{ m.smsDot }}"></span></button>
+                  <button onClick="{{ m.onRWhats }}" style="{{ m.whatsStyle }}"><span style="display:flex;align-items:center;gap:8px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.7-5.2A8.5 8.5 0 1 1 21 11.5z"/></svg>WhatsApp</span><span style="{{ m.whatsDot }}"></span></button>
+                </div>
+                <div style="display:flex;align-items:center;gap:9px;margin-top:11px;font-size:12.5px;color:#5C544B;">Senden <select value="{{ m.rHours }}" onChange="{{ m.onRHours }}" style="border:1px solid #EBDDCB;border-radius:7px;padding:5px 7px;font-size:12.5px;font-weight:600;background:#fff;cursor:pointer;"><option value="6">6 h</option><option value="12">12 h</option><option value="24">24 h</option><option value="48">48 h</option></select> vor Deadline</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:#34A853;background:#E9F6EE;border:1px solid #CDEBD7;border-radius:9px;padding:8px 10px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>In Google Kalender gespiegelt</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============== NEW TASK MODAL ============== -->
+    <sc-if value="{{ showNew }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ onCancelNew }}" style="position:fixed;inset:0;background:rgba(26,23,20,.42);display:flex;align-items:center;justify-content:center;padding:28px;z-index:65;animation:ao-fade .18s ease;">
+        <div onClick="{{ stop }}" style="width:100%;max-width:540px;background:#fff;border-radius:18px;box-shadow:0 30px 70px rgba(0,0,0,.34);overflow:hidden;animation:ao-pop .24s cubic-bezier(.22,1,.36,1);">
+          <div style="padding:18px 22px;border-bottom:1px solid #EEE0CF;display:flex;align-items:center;"><h2 style="font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:600;margin:0;letter-spacing:-0.01em;">Neue Aufgabe</h2><button onClick="{{ onCancelNew }}" style="margin-left:auto;width:32px;height:32px;border-radius:8px;border:1px solid #EFE1D0;background:#fff;color:#5C544B;cursor:pointer;display:flex;align-items:center;justify-content:center;" style-hover="background:#FBF1E4;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button></div>
+          <div style="padding:20px 22px;display:flex;flex-direction:column;gap:15px;">
+            <div><div style="font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#A99E90;margin-bottom:6px;">Titel <span style="color:#C96B2E;">*</span></div><input value="{{ nd.title }}" onChange="{{ onNewTitle }}" placeholder="z.B. Villa Seeblick – Schnitt" style="width:100%;border:1px solid #EBDDCB;border-radius:10px;padding:11px;font-size:14px;background:#FDFAF5;"></div>
+            <div style="display:flex;gap:12px;">
+              <div style="flex:1;"><div style="font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#A99E90;margin-bottom:6px;">Board</div><select value="{{ nd.boardId }}" onChange="{{ onNewBoard }}" style="width:100%;border:1px solid #EBDDCB;border-radius:10px;padding:11px;font-size:13.5px;font-weight:600;background:#fff;cursor:pointer;"><sc-for list="{{ boardOptions }}" as="b" hint-placeholder-count="3"><option value="{{ b.id }}">{{ b.title }}</option></sc-for></select></div>
+              <div style="flex:1;"><div style="font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#A99E90;margin-bottom:6px;">Status</div><select value="{{ nd.status }}" onChange="{{ onNewStatus }}" style="width:100%;border:1px solid #EBDDCB;border-radius:10px;padding:11px;font-size:13.5px;font-weight:600;background:#fff;cursor:pointer;"><option value="todo">To Do</option><option value="doing">In Arbeit</option><option value="review">Review</option><option value="done">Erledigt</option></select></div>
+            </div>
+            <div style="display:flex;gap:12px;">
+              <div style="flex:1;"><div style="font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#A99E90;margin-bottom:6px;">Priorität</div><select value="{{ nd.priority }}" onChange="{{ onNewPriority }}" style="width:100%;border:1px solid #EBDDCB;border-radius:10px;padding:11px;font-size:13.5px;font-weight:600;background:#fff;cursor:pointer;"><option value="hoch">Hoch</option><option value="mittel">Mittel</option><option value="niedrig">Niedrig</option></select></div>
+              <div style="flex:1;"><div style="font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#A99E90;margin-bottom:6px;">Deadline <span style="color:#C96B2E;">*</span></div><input type="date" value="{{ nd.deadline }}" onChange="{{ onNewDeadline }}" style="width:100%;border:1px solid #EBDDCB;border-radius:10px;padding:11px;font-size:13.5px;font-weight:600;background:#FDFAF5;"></div>
+            </div>
+            <div style="display:flex;gap:12px;">
+              <div style="flex:1.6;"><div style="font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#A99E90;margin-bottom:6px;">Zuweisen an</div><select value="{{ nd.personId }}" onChange="{{ onNewPerson }}" style="width:100%;border:1px solid #EBDDCB;border-radius:10px;padding:11px;font-size:13.5px;font-weight:600;background:#fff;cursor:pointer;"><option value="">— niemand —</option><sc-for list="{{ peopleOptions }}" as="p" hint-placeholder-count="5"><option value="{{ p.id }}">{{ p.name }}</option></sc-for></select></div>
+              <div style="flex:1;"><div style="font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#A99E90;margin-bottom:6px;">Stunden</div><input type="number" min="0" value="{{ nd.hours }}" onChange="{{ onNewHours }}" style="width:100%;border:1px solid #EBDDCB;border-radius:10px;padding:11px;font-size:13.5px;font-weight:700;color:#C96B2E;background:#FDFAF5;"></div>
+            </div>
+            <sc-if value="{{ hasNewError }}" hint-placeholder-val="{{ false }}"><div style="background:#FBEEEC;border:1px solid #F0C8C2;color:#B3261E;border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:600;">{{ newError }}</div></sc-if>
+          </div>
+          <div style="padding:16px 22px;border-top:1px solid #EEE0CF;display:flex;gap:10px;justify-content:flex-end;background:#FBF6EE;">
+            <button onClick="{{ onCancelNew }}" style="background:#fff;border:1px solid #EBDDCB;border-radius:10px;padding:10px 16px;font-size:13.5px;font-weight:600;color:#5C544B;cursor:pointer;" style-hover="background:#F6E8D6;">Abbrechen</button>
+            <button onClick="{{ onCreate }}" style="background:#C96B2E;border:none;color:#fff;border-radius:10px;padding:10px 18px;font-size:13.5px;font-weight:600;cursor:pointer;" style-hover="background:#B25A23;">Aufgabe erstellen</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============== PERSON MODAL ============== -->
+    <sc-if value="{{ showPerson }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ onCancelPerson }}" style="position:fixed;inset:0;background:rgba(26,23,20,.42);display:flex;align-items:center;justify-content:center;padding:28px;z-index:65;animation:ao-fade .18s ease;">
+        <div onClick="{{ stop }}" style="width:100%;max-width:460px;background:#fff;border-radius:18px;box-shadow:0 30px 70px rgba(0,0,0,.34);overflow:hidden;animation:ao-pop .24s cubic-bezier(.22,1,.36,1);">
+          <div style="padding:18px 22px;border-bottom:1px solid #EEE0CF;display:flex;align-items:center;"><h2 style="font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:600;margin:0;letter-spacing:-0.01em;">{{ personTitle }}</h2><button onClick="{{ onCancelPerson }}" style="margin-left:auto;width:32px;height:32px;border-radius:8px;border:1px solid #EFE1D0;background:#fff;color:#5C544B;cursor:pointer;display:flex;align-items:center;justify-content:center;" style-hover="background:#FBF1E4;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button></div>
+          <div style="padding:20px 22px;display:flex;flex-direction:column;gap:14px;">
+            <div><div style="font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#A99E90;margin-bottom:6px;">Name</div><input value="{{ pd.name }}" onChange="{{ onPersonName }}" placeholder="Vor- und Nachname" style="width:100%;border:1px solid #EBDDCB;border-radius:10px;padding:11px;font-size:14px;background:#FDFAF5;"></div>
+            <div style="display:flex;gap:12px;">
+              <div style="flex:1.6;"><div style="font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#A99E90;margin-bottom:6px;">Rolle</div><input value="{{ pd.role }}" onChange="{{ onPersonRole }}" placeholder="z.B. Editor" style="width:100%;border:1px solid #EBDDCB;border-radius:10px;padding:11px;font-size:13.5px;background:#FDFAF5;"></div>
+              <div style="flex:1;"><div style="font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#A99E90;margin-bottom:6px;">Kapazität/Wo.</div><input type="number" min="0" value="{{ pd.capacity }}" onChange="{{ onPersonCap }}" style="width:100%;border:1px solid #EBDDCB;border-radius:10px;padding:11px;font-size:13.5px;font-weight:700;color:#C96B2E;background:#FDFAF5;"></div>
+            </div>
+            <div><div style="font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#A99E90;margin-bottom:6px;">E-Mail</div><input value="{{ pd.email }}" onChange="{{ onPersonEmail }}" placeholder="name@aero-one.de" style="width:100%;border:1px solid #EBDDCB;border-radius:10px;padding:11px;font-size:13.5px;background:#FDFAF5;"></div>
+            <div><div style="font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#A99E90;margin-bottom:6px;">Telefon · für SMS/WhatsApp</div><input value="{{ pd.phone }}" onChange="{{ onPersonPhone }}" placeholder="+49 …" style="width:100%;border:1px solid #EBDDCB;border-radius:10px;padding:11px;font-size:13.5px;background:#FDFAF5;"></div>
+            <sc-if value="{{ hasPersonError }}" hint-placeholder-val="{{ false }}"><div style="background:#FBEEEC;border:1px solid #F0C8C2;color:#B3261E;border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:600;">{{ personError }}</div></sc-if>
+          </div>
+          <div style="padding:16px 22px;border-top:1px solid #EEE0CF;display:flex;gap:10px;justify-content:flex-end;background:#FBF6EE;">
+            <button onClick="{{ onCancelPerson }}" style="background:#fff;border:1px solid #EBDDCB;border-radius:10px;padding:10px 16px;font-size:13.5px;font-weight:600;color:#5C544B;cursor:pointer;" style-hover="background:#F6E8D6;">Abbrechen</button>
+            <button onClick="{{ onSavePerson }}" style="background:#C96B2E;border:none;color:#fff;border-radius:10px;padding:10px 18px;font-size:13.5px;font-weight:600;cursor:pointer;" style-hover="background:#B25A23;">Speichern</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============== NOTIFICATIONS PANEL ============== -->
+    <sc-if value="{{ showNotifs }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ onCloseNotifs }}" style="position:fixed;inset:0;background:rgba(26,23,20,.42);z-index:70;animation:ao-fade .18s ease;">
+        <div onClick="{{ stop }}" style="position:absolute;top:0;right:0;height:100%;width:392px;max-width:92vw;background:#FEF7ED;box-shadow:-12px 0 40px rgba(0,0,0,.22);display:flex;flex-direction:column;animation:ao-slide .26s cubic-bezier(.22,1,.36,1);">
+          <div style="padding:18px 20px;border-bottom:1px solid #EEE0CF;display:flex;align-items:center;gap:10px;">
+            <div><h2 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600;margin:0;letter-spacing:-0.01em;">Benachrichtigungen</h2><div style="font-size:12px;color:#8A8076;margin-top:2px;">Brevo · automatische Deadline-Erinnerungen</div></div>
+            <button onClick="{{ onCloseNotifs }}" style="margin-left:auto;width:32px;height:32px;border-radius:8px;border:1px solid #EFE1D0;background:#fff;color:#5C544B;cursor:pointer;display:flex;align-items:center;justify-content:center;" style-hover="background:#FBF1E4;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button>
+          </div>
+          <div style="flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px;">
+            <sc-for list="{{ notifs.items }}" as="n" hint-placeholder-count="4">
+              <div onClick="{{ n.onClick }}" style="background:#fff;border:1px solid #EFE1D0;border-radius:13px;padding:13px;cursor:pointer;box-shadow:0 1px 2px rgba(26,23,20,.04);" style-hover="border-color:#E2CBAE;box-shadow:0 6px 16px rgba(26,23,20,.08);">
+                <div style="display:flex;align-items:center;gap:9px;margin-bottom:9px;">
+                  <span style="{{ n.channelStyle }}">{{ n.channelLabel }}</span>
+                  <span style="flex:1;"></span>
+                  <span style="font-size:11px;color:#A99E90;">{{ n.timeLabel }}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:9px;">
+                  <div style="{{ n.avatarStyle }}">{{ n.recipientInitials }}</div>
+                  <div style="min-width:0;"><div style="font-size:13px;font-weight:600;">{{ n.recipientName }}</div><div style="font-size:11.5px;color:#A99E90;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ n.dest }}</div></div>
+                </div>
+                <div style="font-size:13px;color:#3D3730;line-height:1.5;margin-top:9px;background:#FBF6EE;border-radius:9px;padding:9px 11px;">{{ n.message }}</div>
+              </div>
+            </sc-for>
+            <sc-if value="{{ notifsEmpty }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;color:#A99E90;font-size:13px;padding:40px 20px;">Keine anstehenden Erinnerungen.</div></sc-if>
+          </div>
+          <div style="padding:13px 18px;border-top:1px solid #EEE0CF;display:flex;align-items:center;gap:8px;font-size:12px;color:#34A853;"><span style="width:7px;height:7px;border-radius:50%;background:#4ED17C;"></span>Brevo verbunden · Versand aktiv</div>
+        </div>
+      </div>
+    </sc-if>
+
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;}}">
+class Component extends DCLogic {
+  NOW = new Date(2026, 5, 23, 9, 0, 0);
+  MS = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+  ML = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  WD = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+  STATUSES = [{key:'todo',label:'To Do',dot:'#A99E90'},{key:'doing',label:'In Arbeit',dot:'#C96B2E'},{key:'review',label:'Review',dot:'#8A5A12'},{key:'done',label:'Erledigt',dot:'#4E9A5B'}];
+
+  state = {
+    authed:false, loginLoading:false,
+    view:'board',
+    currentUserId:'p1', userMenuOpen:false,
+    query:'',
+    draggingId:null, dragOverKey:null,
+    selectedId:null, clInput:'',
+    showNew:false, newDraft:{}, newError:'',
+    showNotifs:false,
+    showPerson:false, personDraft:{}, personEditId:null, personError:'',
+    calMonth:new Date(2026,5,1),
+    people:[
+      {id:'p1',name:'Sophie Wenz',role:'Projektleitung',capacity:38,email:'sophie@aero-one.de',phone:'+49 151 2345 6701',color:'#C96B2E',organizer:true},
+      {id:'p2',name:'Lena Brandt',role:'Drohnenpilotin',capacity:32,email:'lena@aero-one.de',phone:'+49 151 2345 6702',color:'#D98324'},
+      {id:'p3',name:'Marco Feld',role:'Editor / Postproduktion',capacity:40,email:'marco@aero-one.de',phone:'+49 151 2345 6703',color:'#B0512A'},
+      {id:'p4',name:'Jonas Reuter',role:'3D & Grafik',capacity:30,email:'jonas@aero-one.de',phone:'+49 151 2345 6704',color:'#E0813F'},
+      {id:'p5',name:'Aylin Kaya',role:'Color & Sound',capacity:24,email:'aylin@aero-one.de',phone:'+49 151 2345 6705',color:'#C2410C'},
+    ],
+    boards:[
+      {id:'b1',title:'Immobilien-Shoots · 48h',subtitle:'Express-Aufträge für Makler'},
+      {id:'b2',title:'Architektur & Bauträger',subtitle:'Großprojekte & Visualisierung'},
+      {id:'b3',title:'Pitches & Wettbewerbe',subtitle:'Akquise & Awards'},
+    ],
+    tasks:[
+      {id:'t1',boardId:'b1',status:'todo',title:'Villa Seeblick – Außenaufnahmen 4K',desc:'Hochwertige Luft- und Bodenaufnahmen der Villa inkl. Garten und Seezugang.',priority:'hoch',deadline:'2026-06-25',progress:0,assignments:[{personId:'p2',hours:6}],checklist:[{text:'Drohne & Akkus laden',done:false},{text:'Flugroute planen',done:true},{text:'Wetter-Check',done:false}],attachments:[{name:'Flugroute_Seeblick.kml',size:'12 KB'}],reminders:{email:true,sms:true,whatsapp:false,hoursBefore:24}},
+      {id:'t2',boardId:'b1',status:'doing',title:'Reihenhaus Lindenweg – Rohschnitt Reel',desc:'Vertikales Reel (9:16) für Instagram, ca. 30 Sek.',priority:'hoch',deadline:'2026-06-24',progress:40,assignments:[{personId:'p3',hours:5}],checklist:[{text:'Aufnahmen sichten',done:true},{text:'Musik auswählen',done:true},{text:'Schnittfassung',done:false}],attachments:[{name:'Footage_Lindenweg.mp4',size:'1.8 GB'}],reminders:{email:false,sms:true,whatsapp:true,hoursBefore:12}},
+      {id:'t3',boardId:'b1',status:'review',title:'Penthouse Rheinblick – Color Grading',desc:'Cinematic Grading, warmes Abendlicht.',priority:'mittel',deadline:'2026-06-26',progress:80,assignments:[{personId:'p5',hours:3}],checklist:[{text:'LUT anwenden',done:true},{text:'Hauttöne prüfen',done:false}],attachments:[],reminders:{email:true,sms:false,whatsapp:false,hoursBefore:24}},
+      {id:'t4',boardId:'b1',status:'done',title:'Makler Sahin – Drohnen-Genehmigung',desc:'Aufstiegsgenehmigung für die Flugzone einholen.',priority:'mittel',deadline:'2026-06-20',progress:100,assignments:[{personId:'p2',hours:1}],checklist:[{text:'Antrag stellen',done:true},{text:'Bestätigung ablegen',done:true}],attachments:[],reminders:{email:true,sms:false,whatsapp:false,hoursBefore:24}},
+      {id:'t5',boardId:'b1',status:'todo',title:'Loft Hafen – Thumbnail & Cover',desc:'Cover-Bild und Exposé-Header gestalten.',priority:'niedrig',deadline:'2026-06-27',progress:0,assignments:[{personId:'p4',hours:2}],checklist:[],attachments:[],reminders:{email:true,sms:false,whatsapp:false,hoursBefore:24}},
+      {id:'t6',boardId:'b2',status:'doing',title:'Neubauquartier Süd – 3D-Fassade rendern',desc:'Fotorealistische Fassaden-Visualisierung, 3 Perspektiven.',priority:'hoch',deadline:'2026-07-02',progress:55,assignments:[{personId:'p4',hours:20}],checklist:[{text:'Modell aufbauen',done:true},{text:'Texturen',done:true},{text:'Lighting',done:false},{text:'Final Render',done:false}],attachments:[{name:'Quartier_Sued.blend',size:'240 MB'},{name:'Grundriss.pdf',size:'3.2 MB'}],reminders:{email:true,sms:false,whatsapp:false,hoursBefore:48}},
+      {id:'t7',boardId:'b2',status:'todo',title:'Bauträger Vogt – Befliegungsplan & Genehmigung',desc:'Genehmigung Flugkorridor und Versicherung klären.',priority:'mittel',deadline:'2026-06-29',progress:0,assignments:[{personId:'p2',hours:4}],checklist:[],attachments:[],reminders:{email:true,sms:false,whatsapp:false,hoursBefore:24}},
+      {id:'t8',boardId:'b2',status:'review',title:'Bürocampus West – Imagefilm Tonmischung',desc:'Sounddesign und Sprecher-Mix final abmischen.',priority:'mittel',deadline:'2026-06-30',progress:70,assignments:[{personId:'p5',hours:4},{personId:'p3',hours:2}],checklist:[],attachments:[],reminders:{email:false,sms:false,whatsapp:true,hoursBefore:24}},
+      {id:'t9',boardId:'b2',status:'todo',title:'Quartier Süd – Storyboard Drohnenflug',desc:'Flugpfad und Shotliste für den Kameraflug.',priority:'niedrig',deadline:'2026-07-01',progress:0,assignments:[{personId:'p1',hours:3}],checklist:[],attachments:[],reminders:{email:true,sms:false,whatsapp:false,hoursBefore:24}},
+      {id:'t10',boardId:'b2',status:'done',title:'Klinik-Neubau – Bestandsbefliegung',desc:'Doku-Befliegung Bauabschnitt 2.',priority:'mittel',deadline:'2026-06-18',progress:100,assignments:[{personId:'p2',hours:6}],checklist:[],attachments:[],reminders:{email:true,sms:false,whatsapp:false,hoursBefore:24}},
+      {id:'t11',boardId:'b3',status:'doing',title:'Pitch-Deck „Smart City Award"',desc:'Konzept und Visuals für die Award-Einreichung.',priority:'hoch',deadline:'2026-06-26',progress:35,assignments:[{personId:'p1',hours:8}],checklist:[{text:'Story',done:true},{text:'Slides',done:false},{text:'Mockups',done:false}],attachments:[{name:'SmartCity_Brief.pdf',size:'900 KB'}],reminders:{email:true,sms:true,whatsapp:false,hoursBefore:24}},
+      {id:'t12',boardId:'b3',status:'todo',title:'Showreel 2026 – Best-of Schnitt',desc:'90-Sekunden Showreel aus Top-Projekten.',priority:'mittel',deadline:'2026-07-04',progress:0,assignments:[{personId:'p3',hours:12}],checklist:[],attachments:[],reminders:{email:true,sms:false,whatsapp:false,hoursBefore:24}},
+      {id:'t13',boardId:'b3',status:'todo',title:'Wettbewerb „Real Estate Visuals" – Konzept',desc:'Einreichungskonzept und Moodboard erstellen.',priority:'hoch',deadline:'2026-06-28',progress:0,assignments:[{personId:'p1',hours:4},{personId:'p4',hours:6}],checklist:[],attachments:[],reminders:{email:true,sms:true,whatsapp:false,hoursBefore:24}},
+      {id:'t14',boardId:'b3',status:'review',title:'Case Study Villa Seeblick – Layout',desc:'PDF-Case-Study, 6 Seiten.',priority:'niedrig',deadline:'2026-06-27',progress:90,assignments:[{personId:'p4',hours:4}],checklist:[],attachments:[{name:'CaseStudy_v2.pdf',size:'2.1 MB'}],reminders:{email:true,sms:false,whatsapp:false,hoursBefore:24}},
+    ],
+  };
+
+  // ---------- helpers ----------
+  person(id){ return this.state.people.find(p=>p.id===id); }
+  get cu(){ return this.person(this.state.currentUserId) || this.state.people[0]; }
+  isOrg(){ return !!this.cu.organizer; }
+  initials(n){ return (n||'').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase(); }
+  avatar(color,size,fs){ return `width:${size}px;height:${size}px;border-radius:50%;background:${color};color:#fff;font-size:${fs}px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;letter-spacing:.02em;`; }
+  parse(s){ if(!s) return null; const a=s.split('-').map(Number); return new Date(a[0],a[1]-1,a[2]); }
+  strip(d){ return new Date(d.getFullYear(),d.getMonth(),d.getDate()); }
+  diffDays(a,b){ return Math.round((this.strip(a)-this.strip(b))/86400000); }
+  fmtShort(d){ return d ? d.getDate()+'. '+this.MS[d.getMonth()] : ''; }
+  dkey(d){ return d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate(); }
+  taskHours(t){ return (t.assignments||[]).reduce((s,a)=>s+(+a.hours||0),0); }
+  prio(p){ const m={hoch:{label:'Hoch',bg:'#F8E0D2',fg:'#B0481F'},mittel:{label:'Mittel',bg:'#FBEBCF',fg:'#8A5A12'},niedrig:{label:'Niedrig',bg:'#ECE6DC',fg:'#6B635B'}}; return m[p]||m.mittel; }
+  pillBase(){ return 'display:inline-flex;align-items:center;font-size:11px;font-weight:700;border-radius:999px;padding:3px 9px;letter-spacing:.01em;'; }
+  ddPillStyle(st){ const m={over:'background:#FAE0DC;color:#B3261E;',soon:'background:#F8E6D0;color:#B0481F;',ok:'background:#EFE7DA;color:#6B635B;',none:'background:#EFE7DA;color:#9A9087;'}; return 'display:inline-flex;align-items:center;font-size:11px;font-weight:700;border-radius:999px;padding:3px 9px;'+(m[st]||m.none); }
+  deadlineMeta(s){ const d=this.parse(s); if(!d) return {label:'—',rel:'Keine Deadline',state:'none'}; const dd=this.diffDays(d,this.NOW); let rel,st; if(dd<0){rel='überfällig';st='over';} else if(dd===0){rel='heute fällig';st='soon';} else if(dd===1){rel='morgen fällig';st='soon';} else if(dd<=2){rel='in '+dd+' Tagen';st='soon';} else {rel='in '+dd+' Tagen';st='ok';} return {label:this.fmtShort(d),rel,state:st,dd}; }
+  fileIcon(n){ const e=(n.split('.').pop()||'').toLowerCase(); const m={pdf:'PDF',mp4:'MP4',mov:'MOV',png:'IMG',jpg:'IMG',jpeg:'IMG',kml:'KML',blend:'3D',doc:'DOC',docx:'DOC',xls:'XLS',xlsx:'XLS',zip:'ZIP'}; return m[e]||(e?e.slice(0,3).toUpperCase():'DAT'); }
+  fmtSize(b){ if(b<1024) return b+' B'; if(b<1048576) return Math.round(b/1024)+' KB'; return (b/1048576).toFixed(1)+' MB'; }
+  isoWeek(d){ const x=new Date(d.getTime()); x.setHours(0,0,0,0); x.setDate(x.getDate()+3-((x.getDay()+6)%7)); const w1=new Date(x.getFullYear(),0,4); return 1+Math.round(((x-w1)/86400000-3+((w1.getDay()+6)%7))/7); }
+
+  updateTask(id,fn){ this.setState(s=>({tasks:s.tasks.map(t=>t.id===id?fn({...t}):t)})); }
+  moveTask(id,boardId,status){ this.updateTask(id,t=>{ const nt={...t,boardId,status}; if(status==='done') nt.progress=100; else if(t.status==='done'&&t.progress===100) nt.progress=60; return nt; }); }
+  visTasks(){ let ts=this.state.tasks; if(!this.isOrg()){ const me=this.state.currentUserId; ts=ts.filter(t=>(t.assignments||[]).some(a=>a.personId===me)); } return ts; }
+
+  openNew(boardId,status){ this.setState({showNew:true,newError:'',userMenuOpen:false,newDraft:{title:'',boardId:boardId||this.state.boards[0].id,status:status||'todo',priority:'mittel',deadline:'',personId:'',hours:4}}); }
+  onCreate(){ const d=this.state.newDraft; if(!d.title||!d.title.trim()){ this.setState({newError:'Bitte einen Titel angeben.'}); return; } if(!d.deadline){ this.setState({newError:'Bitte eine Deadline setzen — ohne Deadline keine Aufgabe.'}); return; } const id='t'+Date.now(); const assignments=d.personId?[{personId:d.personId,hours:+d.hours||0}]:[]; const task={id,boardId:d.boardId,status:d.status,title:d.title.trim(),desc:'',priority:d.priority,deadline:d.deadline,progress:0,assignments,checklist:[],attachments:[],reminders:{email:true,sms:false,whatsapp:false,hoursBefore:24}}; this.setState(s=>({tasks:[...s.tasks,task],showNew:false,newError:'',selectedId:id})); }
+  patchNew(k,v){ this.setState(s=>({newDraft:{...s.newDraft,[k]:v},newError:''})); }
+
+  openPerson(id){ if(id){ const p=this.person(id); this.setState({showPerson:true,personEditId:id,personError:'',personDraft:{name:p.name,role:p.role,capacity:p.capacity,email:p.email,phone:p.phone}}); } else { this.setState({showPerson:true,personEditId:null,personError:'',personDraft:{name:'',role:'',capacity:32,email:'',phone:''}}); } }
+  patchPerson(k,v){ this.setState(s=>({personDraft:{...s.personDraft,[k]:v},personError:''})); }
+  onSavePerson(){ const d=this.state.personDraft; if(!d.name||!d.name.trim()){ this.setState({personError:'Bitte einen Namen angeben.'}); return; } if(this.state.personEditId){ const id=this.state.personEditId; this.setState(s=>({people:s.people.map(p=>p.id===id?{...p,name:d.name.trim(),role:d.role,capacity:+d.capacity||0,email:d.email,phone:d.phone}:p),showPerson:false})); } else { const colors=['#C96B2E','#D98324','#B0512A','#E0813F','#C2410C','#A85A2A']; const id='p'+Date.now(); this.setState(s=>({people:[...s.people,{id,name:d.name.trim(),role:d.role||'Team',capacity:+d.capacity||0,email:d.email,phone:d.phone,color:colors[s.people.length%colors.length]}],showPerson:false})); } }
+
+  // ---------- builders ----------
+  buildBoards(){
+    const q=this.state.query.trim().toLowerCase();
+    const vis=this.visTasks();
+    return this.state.boards.map(b=>{
+      const bt=vis.filter(t=>t.boardId===b.id && (!q||t.title.toLowerCase().includes(q)));
+      let totalH=0;
+      const columns=this.STATUSES.map(st=>{
+        const cards=bt.filter(t=>t.status===st.key).map(t=>this.enrichCard(t));
+        const hours=cards.reduce((s,c)=>s+c.hoursNum,0); totalH+=hours;
+        const key=b.id+'/'+st.key; const isT=this.state.dragOverKey===key;
+        return { key:st.key, label:st.label, count:cards.length, cards, isEmpty:cards.length===0,
+          dotStyle:`width:8px;height:8px;border-radius:50%;background:${st.dot};flex:none;`,
+          style:`flex:0 0 264px;width:264px;background:${isT?'#FBEEDD':'#FAF1E4'};border:1.5px ${isT?'dashed':'solid'} ${isT?'#C96B2E':'#EFE1D0'};border-radius:14px;padding:11px;display:flex;flex-direction:column;gap:10px;min-height:120px;transition:background .12s,border-color .12s;`,
+          onDragOver:(e)=>{ e.preventDefault(); if(this.state.dragOverKey!==key) this.setState({dragOverKey:key}); },
+          onDragLeave:(e)=>{ if(this.state.dragOverKey===key) this.setState({dragOverKey:null}); },
+          onDrop:(e)=>{ e.preventDefault(); const id=this.state.draggingId; if(id) this.moveTask(id,b.id,st.key); this.setState({draggingId:null,dragOverKey:null}); },
+          onAdd:()=>this.openNew(b.id,st.key),
+        };
+      });
+      return { id:b.id, title:b.title, subtitle:b.subtitle, columns, count:bt.length, hoursLabel:totalH+' h',
+        onRename:(e)=>{ const v=e.target.value; this.setState(s=>({boards:s.boards.map(x=>x.id===b.id?{...x,title:v}:x)})); },
+        onDelete:()=>this.setState(s=>({boards:s.boards.filter(x=>x.id!==b.id),tasks:s.tasks.filter(t=>t.boardId!==b.id)})),
+      };
+    });
+  }
+  enrichCard(t){
+    const pm=this.prio(t.priority); const dm=this.deadlineMeta(t.deadline); const hoursNum=this.taskHours(t);
+    const ass=(t.assignments||[]).map(a=>{ const p=this.person(a.personId); return p?{id:p.id,initials:this.initials(p.name),name:p.name,avatarStyle:this.avatar(p.color,24,10)+'margin-right:-6px;border:2px solid #fff;'}:null; }).filter(Boolean);
+    const cl=t.checklist||[]; const clDone=cl.filter(c=>c.done).length; const at=t.attachments||[];
+    return { id:t.id, title:t.title,
+      prioStyle:this.pillBase()+`background:${pm.bg};color:${pm.fg};`, prioLabel:pm.label,
+      deadlineStyle:this.ddPillStyle(dm.state), deadlineLabel:dm.label,
+      showProgress:t.progress>0, progress:t.progress, progressStyle:`height:100%;width:${t.progress}%;background:#C96B2E;border-radius:999px;`,
+      hoursNum, hoursLabel:hoursNum?hoursNum+' h':'',
+      assignees:ass, clLabel:clDone+'/'+cl.length, hasCl:cl.length>0,
+      attachLabel:String(at.length), hasAttach:at.length>0,
+      style:`background:#fff;border:1px solid #EEE0CF;border-radius:12px;padding:11px 12px;display:flex;flex-direction:column;gap:9px;cursor:grab;box-shadow:0 1px 2px rgba(26,23,20,.05);opacity:${this.state.draggingId===t.id?0.4:1};transition:box-shadow .15s,opacity .15s,border-color .15s;`,
+      onClick:()=>this.setState({selectedId:t.id}),
+      onDragStart:(e)=>{ try{ e.dataTransfer.setData('text/plain',t.id); e.dataTransfer.effectAllowed='move'; }catch(_){ } this.setState({draggingId:t.id}); },
+      onDragEnd:()=>this.setState({draggingId:null,dragOverKey:null}),
+    };
+  }
+  buildCapacity(){
+    const active=this.state.tasks.filter(t=>t.status!=='done');
+    const rows=this.state.people.map(p=>{
+      const planned=active.reduce((s,t)=>s+(t.assignments||[]).filter(a=>a.personId===p.id).reduce((x,a)=>x+(+a.hours||0),0),0);
+      const tcount=active.filter(t=>(t.assignments||[]).some(a=>a.personId===p.id)).length;
+      const util=p.capacity?Math.round(planned/p.capacity*100):0; const over=util>100;
+      return { id:p.id, name:p.name, role:p.role, initials:this.initials(p.name), capacity:p.capacity, planned, util, over, tcount,
+        avatarStyle:this.avatar(p.color,38,14)+'margin:0 12px;',
+        barStyle:`height:100%;width:${Math.min(util,100)}%;background:${over?'#C0392B':'#C96B2E'};border-radius:999px;`,
+        utilStyle:`font-size:13px;font-weight:700;color:${over?'#C0392B':'#1A1714'};`,
+        rowStyle:`display:flex;align-items:center;padding:11px 8px;border-radius:11px;${p.id===this.state.currentUserId?'background:#FBEEDD;':''}`,
+      };
+    });
+    const capSum=this.state.people.reduce((s,p)=>s+p.capacity,0);
+    const plSum=rows.reduce((s,r)=>s+r.planned,0);
+    return { rows, capSum, plSum, utilSum:capSum?Math.round(plSum/capSum*100):0, freeSum:Math.max(0,capSum-plSum) };
+  }
+  buildTeam(){
+    const active=this.state.tasks.filter(t=>t.status!=='done');
+    return this.state.people.map(p=>{
+      const planned=active.reduce((s,t)=>s+(t.assignments||[]).filter(a=>a.personId===p.id).reduce((x,a)=>x+(+a.hours||0),0),0);
+      const util=p.capacity?Math.round(planned/p.capacity*100):0; const over=util>100;
+      return { name:p.name, role:p.role, email:p.email, phone:p.phone, initials:this.initials(p.name), isOrg:!!p.organizer, capacity:p.capacity, planned, util,
+        avatarStyle:this.avatar(p.color,46,17),
+        barStyle:`height:100%;width:${Math.min(util,100)}%;background:${over?'#C0392B':'#C96B2E'};border-radius:999px;`,
+        utilStyle:`font-weight:700;color:${over?'#C0392B':'#5C544B'};`,
+        onEdit:()=>this.openPerson(p.id),
+      };
+    });
+  }
+  buildTimeline(){
+    const winStart=this.strip(new Date(2026,5,15)); const total=28;
+    const pct=(d)=>Math.max(0,Math.min(100,this.diffDays(d,winStart)/total*100));
+    const vis=this.visTasks();
+    const groups=this.state.boards.map(b=>{
+      const items=vis.filter(t=>t.boardId===b.id).map(t=>{
+        const dl=this.parse(t.deadline); if(!dl) return null; const h=this.taskHours(t); const span=Math.max(1,Math.ceil(h/6));
+        const st=new Date(dl); st.setDate(st.getDate()-span);
+        const l=pct(st); const r=pct(dl); const w=Math.max(3,r-l); const pm=this.prio(t.priority);
+        const first=(t.assignments&&t.assignments[0])?this.person(t.assignments[0].personId):null;
+        return { id:t.id, title:t.title, assignee:first?this.initials(first.name):'',
+          barStyle:`position:absolute;top:5px;bottom:5px;left:${l}%;width:${w}%;min-width:34px;background:${pm.fg};border-radius:6px;cursor:pointer;${t.status==='done'?'opacity:.55;':''}`,
+          onClick:()=>this.setState({selectedId:t.id}) };
+      }).filter(Boolean);
+      return { title:b.title, items };
+    }).filter(g=>g.items.length);
+    const weeks=[]; for(let i=0;i<4;i++){ const ws=new Date(winStart); ws.setDate(ws.getDate()+i*7); weeks.push({label:'KW '+this.isoWeek(ws),sub:this.fmtShort(ws)}); }
+    return { groups, weeks, todayStyle:`position:absolute;top:0;bottom:0;left:${pct(this.NOW)}%;width:2px;background:#C96B2E;z-index:2;`, hasRows:groups.length>0 };
+  }
+  buildCalendar(){
+    const m=this.state.calMonth; const first=new Date(m.getFullYear(),m.getMonth(),1);
+    const startDow=(first.getDay()+6)%7; const gridStart=new Date(first); gridStart.setDate(1-startDow);
+    const vis=this.visTasks(); const byDay={};
+    vis.forEach(t=>{ const d=this.parse(t.deadline); if(d){ const k=this.dkey(d); (byDay[k]=byDay[k]||[]).push(t); } });
+    const weeks=[];
+    for(let w=0;w<6;w++){ const days=[]; for(let i=0;i<7;i++){ const dd=new Date(gridStart); dd.setDate(gridStart.getDate()+w*7+i); const k=this.dkey(dd); const inM=dd.getMonth()===m.getMonth(); const today=k===this.dkey(this.NOW);
+      const tasks=(byDay[k]||[]).map(t=>{ const pm=this.prio(t.priority); return { id:t.id, title:t.title, dotStyle:`width:6px;height:6px;border-radius:50%;background:${pm.fg};flex:none;`, chipStyle:`display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:#3D3730;background:#FBF1E4;border-radius:6px;padding:3px 6px;cursor:pointer;`, onClick:()=>this.setState({selectedId:t.id}) }; });
+      days.push({ num:dd.getDate(), tasks, numStyle:`font-size:12.5px;font-weight:${today?'700':'600'};color:${today?'#fff':(inM?'#3D3730':'#C2B8AC')};${today?'background:#C96B2E;':''}${today?'width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;':''}`, cellStyle:`min-height:96px;border:1px solid #EFE1D0;border-radius:10px;padding:7px;background:${inM?'#fff':'#FBF4EA'};overflow:hidden;` });
+    } weeks.push(days); }
+    return { monthLabel:this.ML[m.getMonth()]+' '+m.getFullYear(), weekdays:this.WD, weeks,
+      onPrev:()=>this.setState(s=>({calMonth:new Date(s.calMonth.getFullYear(),s.calMonth.getMonth()-1,1)})),
+      onNext:()=>this.setState(s=>({calMonth:new Date(s.calMonth.getFullYear(),s.calMonth.getMonth()+1,1)})) };
+  }
+  buildNotifs(){
+    const ch=(t)=>{ const r=t.reminders||{}; if(r.whatsapp) return {k:'whatsapp',label:'WhatsApp'}; if(r.sms) return {k:'sms',label:'SMS'}; return {k:'email',label:'E-Mail'}; };
+    const chStyle=(k)=>{ const m={whatsapp:'background:#E3F3E5;color:#1F7A33;',sms:'background:#E5EEFB;color:#1F5BB5;',email:'background:#F8E6D0;color:#B0481F;'}; return this.pillBase()+m[k]; };
+    const ups=this.state.tasks.filter(t=>t.status!=='done').map(t=>({t,dm:this.deadlineMeta(t.deadline)})).filter(x=>x.dm.dd!==undefined&&x.dm.dd<=3).sort((a,b)=>a.dm.dd-b.dm.dd);
+    const items=[];
+    ups.forEach(({t,dm})=>{ const p=(t.assignments&&t.assignments[0])?this.person(t.assignments[0].personId):null; if(!p) return; const c=ch(t); const when=dm.dd<0?'vor 1 Std':(dm.dd===0?'vor 2 Std':(dm.dd===1?'heute, 08:05':'gestern, 17:30'));
+      items.push({ id:t.id+c.k, channelLabel:c.label, channelStyle:chStyle(c.k), recipientName:p.name, recipientInitials:this.initials(p.name), avatarStyle:this.avatar(p.color,30,11), dest:c.k==='email'?p.email:p.phone, message:`„${t.title}" ist ${dm.rel}.`, timeLabel:when, onClick:()=>this.setState({selectedId:t.id,showNotifs:false}) }); });
+    return { items, count:items.length };
+  }
+  buildTaskModal(){
+    const t=this.state.tasks.find(x=>x.id===this.state.selectedId); if(!t) return null;
+    const board=this.state.boards.find(b=>b.id===t.boardId); const dm=this.deadlineMeta(t.deadline);
+    const assigned=(t.assignments||[]).map(a=>{ const p=this.person(a.personId); if(!p) return null; return { name:p.name, initials:this.initials(p.name), hours:a.hours, avatarStyle:this.avatar(p.color,28,11),
+      onHours:(e)=>{ const v=Math.max(0,+e.target.value||0); this.updateTask(t.id,tt=>({...tt,assignments:tt.assignments.map(x=>x.personId===p.id?{...x,hours:v}:x)})); },
+      onRemove:()=>this.updateTask(t.id,tt=>({...tt,assignments:tt.assignments.filter(x=>x.personId!==p.id)})) }; }).filter(Boolean);
+    const avail=this.state.people.filter(p=>!(t.assignments||[]).some(a=>a.personId===p.id)).map(p=>({ name:p.name.split(' ')[0], initials:this.initials(p.name), avatarStyle:this.avatar(p.color,20,9), onAdd:()=>this.updateTask(t.id,tt=>({...tt,assignments:[...(tt.assignments||[]),{personId:p.id,hours:2}]})) }));
+    const checklist=(t.checklist||[]).map((c,i)=>({ text:c.text, done:c.done,
+      boxStyle:`width:20px;height:20px;border-radius:6px;border:1.5px solid ${c.done?'#C96B2E':'#D8C4A9'};background:${c.done?'#C96B2E':'#fff'};cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none;`,
+      textStyle:`flex:1;font-size:13.5px;text-decoration:${c.done?'line-through':'none'};color:${c.done?'#A99E90':'#1A1714'};`,
+      onToggle:()=>this.updateTask(t.id,tt=>({...tt,checklist:tt.checklist.map((x,j)=>j===i?{...x,done:!x.done}:x)})),
+      onRemove:()=>this.updateTask(t.id,tt=>({...tt,checklist:tt.checklist.filter((_,j)=>j!==i)})) }));
+    const attachments=(t.attachments||[]).map((f,i)=>({ name:f.name, meta:f.size, icon:this.fileIcon(f.name), onRemove:()=>this.updateTask(t.id,tt=>({...tt,attachments:tt.attachments.filter((_,j)=>j!==i)})) }));
+    const rem=t.reminders||{}; const remBtn=(on)=>`display:flex;align-items:center;justify-content:space-between;width:100%;border:1px solid ${on?'#C96B2E':'#EBDDCB'};background:${on?'#FBEEDD':'#fff'};color:${on?'#B0481F':'#5C544B'};border-radius:9px;padding:9px 11px;font-size:13px;font-weight:600;cursor:pointer;`;
+    const dot=(on)=>`width:18px;height:18px;border-radius:50%;background:${on?'#C96B2E':'#E2D2BE'};flex:none;position:relative;transition:background .15s;`;
+    return { id:t.id, title:t.title, desc:t.desc||'', boardTitle:board?board.title:'',
+      onTitle:(e)=>this.updateTask(t.id,tt=>({...tt,title:e.target.value})), onDesc:(e)=>this.updateTask(t.id,tt=>({...tt,desc:e.target.value})),
+      status:t.status, priority:t.priority, deadline:t.deadline, progress:t.progress, boardId:t.boardId,
+      deadlineMeta:dm.rel, deadlineState:`font-size:12px;font-weight:600;margin-top:6px;color:${dm.state==='over'?'#B3261E':(dm.state==='soon'?'#B0481F':'#8A8076')};`,
+      onStatus:(e)=>this.moveTask(t.id,t.boardId,e.target.value),
+      onBoard:(e)=>this.updateTask(t.id,tt=>({...tt,boardId:e.target.value})),
+      onPriority:(e)=>this.updateTask(t.id,tt=>({...tt,priority:e.target.value})),
+      onDeadline:(e)=>this.updateTask(t.id,tt=>({...tt,deadline:e.target.value})),
+      onProgress:(e)=>{ const v=+e.target.value; this.updateTask(t.id,tt=>({...tt,progress:v,status:v===100?'done':(tt.status==='done'?'review':tt.status)})); },
+      totalHours:this.taskHours(t),
+      assigned, hasAvail:avail.length>0, avail,
+      checklist, clDone:(t.checklist||[]).filter(c=>c.done).length, clTotal:(t.checklist||[]).length,
+      newClText:this.state.clInput, onClInput:(e)=>this.setState({clInput:e.target.value}),
+      onClKey:(e)=>{ if(e.key==='Enter'){ const v=(this.state.clInput||'').trim(); if(v){ this.updateTask(t.id,tt=>({...tt,checklist:[...(tt.checklist||[]),{text:v,done:false}]})); this.setState({clInput:''}); } } },
+      onAddCl:()=>{ const v=(this.state.clInput||'').trim(); if(!v) return; this.updateTask(t.id,tt=>({...tt,checklist:[...(tt.checklist||[]),{text:v,done:false}]})); this.setState({clInput:''}); },
+      attachments, onAddFile:(e)=>{ const fs=[...(e.target.files||[])].map(f=>({name:f.name,size:this.fmtSize(f.size)})); if(fs.length) this.updateTask(t.id,tt=>({...tt,attachments:[...(tt.attachments||[]),...fs]})); },
+      emailStyle:remBtn(!!rem.email), smsStyle:remBtn(!!rem.sms), whatsStyle:remBtn(!!rem.whatsapp),
+      emailDot:dot(!!rem.email), smsDot:dot(!!rem.sms), whatsDot:dot(!!rem.whatsapp),
+      onREmail:()=>this.updateTask(t.id,tt=>({...tt,reminders:{...(tt.reminders||{}),email:!(tt.reminders||{}).email}})),
+      onRSms:()=>this.updateTask(t.id,tt=>({...tt,reminders:{...(tt.reminders||{}),sms:!(tt.reminders||{}).sms}})),
+      onRWhats:()=>this.updateTask(t.id,tt=>({...tt,reminders:{...(tt.reminders||{}),whatsapp:!(tt.reminders||{}).whatsapp}})),
+      rHours:rem.hoursBefore||24, onRHours:(e)=>this.updateTask(t.id,tt=>({...tt,reminders:{...(tt.reminders||{}),hoursBefore:+e.target.value}})),
+      boardsList:this.state.boards.map(b=>({id:b.id,title:b.title})),
+      onClose:()=>this.setState({selectedId:null,clInput:''}),
+      onDelete:()=>this.setState(s=>({tasks:s.tasks.filter(x=>x.id!==t.id),selectedId:null})),
+    };
+  }
+
+  navStyle(key){ const a=this.state.view===key; return `display:flex;align-items:center;gap:11px;width:100%;text-align:left;padding:10px 12px;border-radius:10px;border:none;cursor:pointer;font-size:14px;font-family:inherit;font-weight:${a?'600':'500'};background:${a?'rgba(201,107,46,.18)':'transparent'};color:${a?'#EE9C57':'#B7ADA1'};transition:background .15s,color .15s;`; }
+
+  renderVals(){
+    const view=this.state.view;
+    const titles={board:['Boards','Mehrere Kanban-Boards · Karten per Drag & Drop verschieben'],timeline:['Timeline','Gantt-Ansicht aller Aufgaben mit Deadlines'],calendar:['Kalender','Termine — gespiegelt in Google Kalender'],capacity:['Kapazitätsplanung','Verplante Stunden je Person und Woche'],team:['Team','Personen, Kapazitäten und Kontakte verwalten']};
+    const m=this.buildTaskModal();
+    const notifs=this.buildNotifs();
+    const switchList=this.state.people.map(p=>({ id:p.id, name:p.name, initials:this.initials(p.name), roleTag:p.organizer?'Organisator':'Mitglied', isCurrent:p.id===this.state.currentUserId, avatarStyle:this.avatar(p.color,32,12), rowStyle:`display:flex;align-items:center;gap:10px;width:100%;border:none;background:${p.id===this.state.currentUserId?'#FBEEDD':'transparent'};border-radius:9px;padding:8px 9px;cursor:pointer;`, onPick:()=>this.setState({currentUserId:p.id,userMenuOpen:false}) }));
+    const nd=this.state.newDraft||{};
+    const pd=this.state.personDraft||{};
+    return {
+      isLogin:!this.state.authed, isApp:this.state.authed, loginLoading:this.state.loginLoading, loginIdle:!this.state.loginLoading,
+      onGoogle:()=>{ if(this.state.loginLoading) return; this.setState({loginLoading:true}); setTimeout(()=>this.setState({authed:true,loginLoading:false}),900); },
+      onGuest:()=>this.setState({authed:true}),
+      stop:(e)=>e.stopPropagation(),
+      navBoard:this.navStyle('board'), navTimeline:this.navStyle('timeline'), navCalendar:this.navStyle('calendar'), navCapacity:this.navStyle('capacity'), navTeam:this.navStyle('team'),
+      goBoard:()=>this.setState({view:'board',userMenuOpen:false}), goTimeline:()=>this.setState({view:'timeline',userMenuOpen:false}), goCalendar:()=>this.setState({view:'calendar',userMenuOpen:false}), goCapacity:()=>this.setState({view:'capacity',userMenuOpen:false}), goTeam:()=>this.setState({view:'team',userMenuOpen:false}),
+      cuName:this.cu.name, cuInitials:this.initials(this.cu.name), cuRoleTag:this.isOrg()?'Organisator':this.cu.role, cuAvatarStyle:this.avatar(this.cu.color,34,13),
+      userMenuOpen:this.state.userMenuOpen, onToggleUserMenu:()=>this.setState(s=>({userMenuOpen:!s.userMenuOpen})), switchList,
+      viewTitle:titles[view][0], viewSubtitle:titles[view][1],
+      isBoard:view==='board', isTimeline:view==='timeline', isCalendar:view==='calendar', isCapacity:view==='capacity', isTeam:view==='team',
+      showSearch:view==='board', query:this.state.query, onQuery:(e)=>this.setState({query:e.target.value}),
+      hasNotif:notifs.count>0, notifCount:notifs.count, onOpenNotifs:()=>this.setState({showNotifs:true}),
+      onNewTaskTop:()=>this.openNew(),
+      showBanner:!this.isOrg(), onBackOrg:()=>this.setState({currentUserId:'p1'}),
+      boards:this.buildBoards(), onAddBoard:()=>this.setState(s=>({boards:[...s.boards,{id:'b'+Date.now(),title:'Neues Board',subtitle:'Beschreibung hinzufügen'}]})),
+      tl:this.buildTimeline(), cal:this.buildCalendar(), cap:this.buildCapacity(),
+      teamCards:this.buildTeam(), onAddPerson:()=>this.openPerson(null),
+      showModal:!!m, m:m||{},
+      showNew:this.state.showNew, nd, hasNewError:!!this.state.newError, newError:this.state.newError,
+      boardOptions:this.state.boards.map(b=>({id:b.id,title:b.title})), peopleOptions:this.state.people.map(p=>({id:p.id,name:p.name})),
+      onNewTitle:(e)=>this.patchNew('title',e.target.value), onNewBoard:(e)=>this.patchNew('boardId',e.target.value), onNewStatus:(e)=>this.patchNew('status',e.target.value), onNewPriority:(e)=>this.patchNew('priority',e.target.value), onNewDeadline:(e)=>this.patchNew('deadline',e.target.value), onNewPerson:(e)=>this.patchNew('personId',e.target.value), onNewHours:(e)=>this.patchNew('hours',e.target.value),
+      onCreate:()=>this.onCreate(), onCancelNew:()=>this.setState({showNew:false,newError:''}),
+      showPerson:this.state.showPerson, pd, personTitle:this.state.personEditId?'Person bearbeiten':'Person hinzufügen', hasPersonError:!!this.state.personError, personError:this.state.personError,
+      onPersonName:(e)=>this.patchPerson('name',e.target.value), onPersonRole:(e)=>this.patchPerson('role',e.target.value), onPersonCap:(e)=>this.patchPerson('capacity',e.target.value), onPersonEmail:(e)=>this.patchPerson('email',e.target.value), onPersonPhone:(e)=>this.patchPerson('phone',e.target.value),
+      onSavePerson:()=>this.onSavePerson(), onCancelPerson:()=>this.setState({showPerson:false,personError:''}),
+      showNotifs:this.state.showNotifs, notifs, notifsEmpty:notifs.count===0, onCloseNotifs:()=>this.setState({showNotifs:false}),
+    };
+  }
+}
+</script>
+</body>
+</html>
