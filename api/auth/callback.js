@@ -7,6 +7,7 @@ import { isAllowed } from '../_lib/allowlist.js';
 import { createSession, SESSION_COOKIE, SESSION_MAX_AGE } from '../_lib/session.js';
 import { readCookies, setCookie, clearCookie, baseUrl, redirect } from '../_lib/http.js';
 import { db } from '../_lib/db.js';
+import { encrypt } from '../_lib/crypto.js';
 
 export default async function handler(req, res) {
   try {
@@ -46,10 +47,14 @@ export default async function handler(req, res) {
       const sql = db();
       const rows = await sql`select id from people where lower(email)=lower(${p.email}) limit 1`;
       const personId = rows[0]?.id || null;
-      await sql`insert into users (google_sub,email,name,picture,person_id,last_login_at)
-                values (${p.sub},${p.email},${p.name || ''},${p.picture || ''},${personId},now())
+      // refresh_token is only returned on consent (we force prompt=consent), so
+      // keep any previously-stored token when this login doesn't include one.
+      const rtEnc = tokens.refresh_token ? encrypt(tokens.refresh_token) : null;
+      await sql`insert into users (google_sub,email,name,picture,person_id,refresh_token_enc,last_login_at)
+                values (${p.sub},${p.email},${p.name || ''},${p.picture || ''},${personId},${rtEnc},now())
                 on conflict (email) do update set google_sub=excluded.google_sub, name=excluded.name,
-                  picture=excluded.picture, person_id=coalesce(users.person_id, excluded.person_id), last_login_at=now()`;
+                  picture=excluded.picture, person_id=coalesce(users.person_id, excluded.person_id),
+                  refresh_token_enc=coalesce(excluded.refresh_token_enc, users.refresh_token_enc), last_login_at=now()`;
     } catch (e) {
       console.error('[auth/callback] user upsert failed', e);
     }

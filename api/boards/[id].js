@@ -3,6 +3,7 @@
 import { db } from '../_lib/db.js';
 import { requireSession } from '../_lib/guard.js';
 import { json, readJsonBody } from '../_lib/http.js';
+import { deleteEvent } from '../_lib/calendar.js';
 
 export default async function handler(req, res) {
   const sess = await requireSession(req, res);
@@ -17,8 +18,10 @@ export default async function handler(req, res) {
       return json(res, 200, { ok: true });
     }
     if (req.method === 'DELETE') {
+      const evs = await sql`select google_event_id from tasks where board_id=${id} and google_event_id is not null`;
       await sql`delete from tasks where board_id=${id}`;
       await sql`delete from boards where id=${id}`;
+      for (const e of evs) await deleteEvent(e.google_event_id);
       return json(res, 200, { ok: true });
     }
     res.statusCode = 405;

@@ -3,6 +3,7 @@
 import { db } from '../_lib/db.js';
 import { requireSession } from '../_lib/guard.js';
 import { json, readJsonBody } from '../_lib/http.js';
+import { syncTaskToCalendar, deleteEvent } from '../_lib/calendar.js';
 
 export default async function handler(req, res) {
   const sess = await requireSession(req, res);
@@ -14,10 +15,13 @@ export default async function handler(req, res) {
     if (req.method === 'PATCH' || req.method === 'PUT') {
       const t = await readJsonBody(req);
       await sql`update tasks set board_id=${t.boardId || null}, deadline=${t.deadline || null}, data=${JSON.stringify(t)}, updated_at=now() where id=${id}`;
+      await syncTaskToCalendar(id);
       return json(res, 200, { ok: true });
     }
     if (req.method === 'DELETE') {
+      const ex = await sql`select google_event_id from tasks where id=${id} limit 1`;
       await sql`delete from tasks where id=${id}`;
+      if (ex[0]?.google_event_id) await deleteEvent(ex[0].google_event_id);
       return json(res, 200, { ok: true });
     }
     res.statusCode = 405;

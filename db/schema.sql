@@ -44,6 +44,13 @@ create table if not exists users (
   last_login_at     timestamptz
 );
 
+-- Small key/value store (e.g. the shared Google Calendar id).
+create table if not exists settings (
+  key        text primary key,
+  value      text,
+  updated_at timestamptz not null default now()
+);
+
 -- Dedupe guard for the Brevo reminder cron (added in the Brevo step).
 create table if not exists reminder_log (
   id           bigint generated always as identity primary key,

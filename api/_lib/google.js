@@ -8,8 +8,8 @@ export const SCOPES = [
   'openid',
   'https://www.googleapis.com/auth/userinfo.email',
   'https://www.googleapis.com/auth/userinfo.profile',
-  // Calendar scope is added in the Calendar step:
-  // 'https://www.googleapis.com/auth/calendar.events',
+  // Read/write the shared "Aero One Projekte" calendar (events + calendar creation).
+  'https://www.googleapis.com/auth/calendar',
 ];
 
 export function redirectUri(req) {
