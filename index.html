@@ -551,7 +551,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;}}">
 class Component extends DCLogic {
-  NOW = new Date(2026, 5, 23, 9, 0, 0);
+  NOW = new Date();
   MS = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
   ML = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
   WD = ['Mo','Di','Mi','Do','Fr','Sa','So'];
@@ -567,7 +567,7 @@ class Component extends DCLogic {
     showNew:false, newDraft:{}, newError:'',
     showNotifs:false,
     showPerson:false, personDraft:{}, personEditId:null, personError:'',
-    calMonth:new Date(2026,5,1),
+    calMonth:(function(){var n=new Date();return new Date(n.getFullYear(),n.getMonth(),1);})(),
     people:[
       {id:'p1',name:'Sophie Wenz',role:'Projektleitung',capacity:38,email:'sophie@aero-one.de',phone:'+49 151 2345 6701',color:'#C96B2E',organizer:true},
       {id:'p2',name:'Lena Brandt',role:'Drohnenpilotin',capacity:32,email:'lena@aero-one.de',phone:'+49 151 2345 6702',color:'#D98324'},
@@ -598,21 +598,47 @@ class Component extends DCLogic {
     ],
   };
 
-  // ---------- backend bootstrap ----------
-  // Ask the server who is logged in. If a valid session exists, skip the login
-  // screen and map the Google account to its Team person (by email). Degrades
-  // to the local demo if the backend is unreachable.
-  componentDidMount(){
-    if(!window.AeroAPI) return;
-    AeroAPI.me().then(r=>{
-      if(r && r.authed){
-        const email=((r.user&&r.user.email)||'').toLowerCase();
-        this.setState(s=>{
-          const me=s.people.find(p=>(p.email||'').toLowerCase()===email);
-          return { authed:true, currentUserId: me?me.id:s.currentUserId };
-        });
+  // ---------- backend bootstrap & live sync ----------
+  componentDidMount(){ if(window.AeroAPI) this._boot(); }
+  componentWillUnmount(){ if(this._pollTimer){ clearInterval(this._pollTimer); this._pollTimer=null; } if(this._onVis){ document.removeEventListener('visibilitychange', this._onVis); this._onVis=null; } }
+
+  async _boot(){
+    let me=null;
+    try{ me=await AeroAPI.me(); }catch(e){}
+    if(!me || !me.authed) return; // not logged in -> keep the login screen
+
+    // Load the shared workspace from the DB (or seed it from the demo data on first run).
+    try{
+      const st=await AeroAPI.loadState();
+      if(st && !st.unauthorized){
+        if(st.empty){ AeroAPI.initState({people:this.state.people,boards:this.state.boards,tasks:this.state.tasks}); }
+        else { this.setState({people:st.people,boards:st.boards,tasks:st.tasks}); }
       }
-    }).catch(()=>{});
+    }catch(e){}
+
+    // Reveal the app and map this login to its Team person.
+    this.setState(s=>{
+      let cid=s.currentUserId;
+      if(me.personId) cid=me.personId;
+      else { const mp=s.people.find(p=>(p.email||'').toLowerCase()===((me.user&&me.user.email)||'').toLowerCase()); if(mp) cid=mp.id; }
+      return { authed:true, currentUserId:cid };
+    });
+
+    // Poll for other users' changes — but only while idle, so we never clobber an open edit.
+    this._pollTimer=setInterval(()=>this._poll(), 4000);
+    // Background tabs throttle timers, so re-sync immediately on refocus.
+    this._onVis=()=>{ if(document.visibilityState==='visible') this._poll(); };
+    document.addEventListener('visibilitychange', this._onVis);
+  }
+
+  async _poll(){
+    if(!this.state.authed) return;
+    if(this.state.selectedId||this.state.showNew||this.state.showPerson) return; // a modal is open
+    if(window.AeroAPI && AeroAPI.pendingSaves()>0) return;                        // a save is in flight
+    try{
+      const st=await AeroAPI.loadState();
+      if(st && !st.unauthorized && !st.empty){ this.setState({people:st.people,boards:st.boards,tasks:st.tasks}); }
+    }catch(e){}
   }
 
   // ---------- helpers ----------
@@ -635,17 +661,17 @@ class Component extends DCLogic {
   fmtSize(b){ if(b<1024) return b+' B'; if(b<1048576) return Math.round(b/1024)+' KB'; return (b/1048576).toFixed(1)+' MB'; }
   isoWeek(d){ const x=new Date(d.getTime()); x.setHours(0,0,0,0); x.setDate(x.getDate()+3-((x.getDay()+6)%7)); const w1=new Date(x.getFullYear(),0,4); return 1+Math.round(((x-w1)/86400000-3+((w1.getDay()+6)%7))/7); }
 
-  updateTask(id,fn){ this.setState(s=>({tasks:s.tasks.map(t=>t.id===id?fn({...t}):t)})); }
+  updateTask(id,fn){ const cur=this.state.tasks.find(t=>t.id===id); if(!cur) return; const u=fn({...cur}); this.setState(s=>({tasks:s.tasks.map(t=>t.id===id?u:t)})); if(window.AeroAPI) AeroAPI.saveTask(u); }
   moveTask(id,boardId,status){ this.updateTask(id,t=>{ const nt={...t,boardId,status}; if(status==='done') nt.progress=100; else if(t.status==='done'&&t.progress===100) nt.progress=60; return nt; }); }
   visTasks(){ let ts=this.state.tasks; if(!this.isOrg()){ const me=this.state.currentUserId; ts=ts.filter(t=>(t.assignments||[]).some(a=>a.personId===me)); } return ts; }
 
   openNew(boardId,status){ this.setState({showNew:true,newError:'',userMenuOpen:false,newDraft:{title:'',boardId:boardId||this.state.boards[0].id,status:status||'todo',priority:'mittel',deadline:'',personId:'',hours:4}}); }
-  onCreate(){ const d=this.state.newDraft; if(!d.title||!d.title.trim()){ this.setState({newError:'Bitte einen Titel angeben.'}); return; } if(!d.deadline){ this.setState({newError:'Bitte eine Deadline setzen — ohne Deadline keine Aufgabe.'}); return; } const id='t'+Date.now(); const assignments=d.personId?[{personId:d.personId,hours:+d.hours||0}]:[]; const task={id,boardId:d.boardId,status:d.status,title:d.title.trim(),desc:'',priority:d.priority,deadline:d.deadline,progress:0,assignments,checklist:[],attachments:[],reminders:{email:true,sms:false,whatsapp:false,hoursBefore:24}}; this.setState(s=>({tasks:[...s.tasks,task],showNew:false,newError:'',selectedId:id})); }
+  onCreate(){ const d=this.state.newDraft; if(!d.title||!d.title.trim()){ this.setState({newError:'Bitte einen Titel angeben.'}); return; } if(!d.deadline){ this.setState({newError:'Bitte eine Deadline setzen — ohne Deadline keine Aufgabe.'}); return; } const id='t'+Date.now()+Math.floor(Math.random()*1e4); const assignments=d.personId?[{personId:d.personId,hours:+d.hours||0}]:[]; const task={id,boardId:d.boardId,status:d.status,title:d.title.trim(),desc:'',priority:d.priority,deadline:d.deadline,progress:0,assignments,checklist:[],attachments:[],reminders:{email:true,sms:false,whatsapp:false,hoursBefore:24}}; this.setState(s=>({tasks:[...s.tasks,task],showNew:false,newError:'',selectedId:id})); if(window.AeroAPI) AeroAPI.createTask(task); }
   patchNew(k,v){ this.setState(s=>({newDraft:{...s.newDraft,[k]:v},newError:''})); }
 
   openPerson(id){ if(id){ const p=this.person(id); this.setState({showPerson:true,personEditId:id,personError:'',personDraft:{name:p.name,role:p.role,capacity:p.capacity,email:p.email,phone:p.phone}}); } else { this.setState({showPerson:true,personEditId:null,personError:'',personDraft:{name:'',role:'',capacity:32,email:'',phone:''}}); } }
   patchPerson(k,v){ this.setState(s=>({personDraft:{...s.personDraft,[k]:v},personError:''})); }
-  onSavePerson(){ const d=this.state.personDraft; if(!d.name||!d.name.trim()){ this.setState({personError:'Bitte einen Namen angeben.'}); return; } if(this.state.personEditId){ const id=this.state.personEditId; this.setState(s=>({people:s.people.map(p=>p.id===id?{...p,name:d.name.trim(),role:d.role,capacity:+d.capacity||0,email:d.email,phone:d.phone}:p),showPerson:false})); } else { const colors=['#C96B2E','#D98324','#B0512A','#E0813F','#C2410C','#A85A2A']; const id='p'+Date.now(); this.setState(s=>({people:[...s.people,{id,name:d.name.trim(),role:d.role||'Team',capacity:+d.capacity||0,email:d.email,phone:d.phone,color:colors[s.people.length%colors.length]}],showPerson:false})); } }
+  onSavePerson(){ const d=this.state.personDraft; if(!d.name||!d.name.trim()){ this.setState({personError:'Bitte einen Namen angeben.'}); return; } if(this.state.personEditId){ const id=this.state.personEditId; const cur=this.person(id)||{id}; const up={...cur,name:d.name.trim(),role:d.role,capacity:+d.capacity||0,email:d.email,phone:d.phone}; this.setState(s=>({people:s.people.map(p=>p.id===id?up:p),showPerson:false})); if(window.AeroAPI) AeroAPI.savePerson(up); } else { const colors=['#C96B2E','#D98324','#B0512A','#E0813F','#C2410C','#A85A2A']; const id='p'+Date.now()+Math.floor(Math.random()*1e4); const np={id,name:d.name.trim(),role:d.role||'Team',capacity:+d.capacity||0,email:d.email,phone:d.phone,color:colors[this.state.people.length%colors.length]}; this.setState(s=>({people:[...s.people,np],showPerson:false})); if(window.AeroAPI) AeroAPI.createPerson(np); } }
 
   // ---------- builders ----------
   buildBoards(){
@@ -668,8 +694,8 @@ class Component extends DCLogic {
         };
       });
       return { id:b.id, title:b.title, subtitle:b.subtitle, columns, count:bt.length, hoursLabel:totalH+' h',
-        onRename:(e)=>{ const v=e.target.value; this.setState(s=>({boards:s.boards.map(x=>x.id===b.id?{...x,title:v}:x)})); },
-        onDelete:()=>this.setState(s=>({boards:s.boards.filter(x=>x.id!==b.id),tasks:s.tasks.filter(t=>t.boardId!==b.id)})),
+        onRename:(e)=>{ const v=e.target.value; const ub={...b,title:v}; this.setState(s=>({boards:s.boards.map(x=>x.id===b.id?ub:x)})); if(window.AeroAPI) AeroAPI.saveBoard(ub); },
+        onDelete:()=>{ this.setState(s=>({boards:s.boards.filter(x=>x.id!==b.id),tasks:s.tasks.filter(t=>t.boardId!==b.id)})); if(window.AeroAPI) AeroAPI.deleteBoard(b.id); },
       };
     });
   }
@@ -801,7 +827,7 @@ class Component extends DCLogic {
       rHours:rem.hoursBefore||24, onRHours:(e)=>this.updateTask(t.id,tt=>({...tt,reminders:{...(tt.reminders||{}),hoursBefore:+e.target.value}})),
       boardsList:this.state.boards.map(b=>({id:b.id,title:b.title})),
       onClose:()=>this.setState({selectedId:null,clInput:''}),
-      onDelete:()=>this.setState(s=>({tasks:s.tasks.filter(x=>x.id!==t.id),selectedId:null})),
+      onDelete:()=>{ this.setState(s=>({tasks:s.tasks.filter(x=>x.id!==t.id),selectedId:null})); if(window.AeroAPI) AeroAPI.deleteTask(t.id); },
     };
   }
 
@@ -830,7 +856,7 @@ class Component extends DCLogic {
       hasNotif:notifs.count>0, notifCount:notifs.count, onOpenNotifs:()=>this.setState({showNotifs:true}),
       onNewTaskTop:()=>this.openNew(),
       showBanner:!this.isOrg(), onBackOrg:()=>this.setState({currentUserId:'p1'}),
-      boards:this.buildBoards(), onAddBoard:()=>this.setState(s=>({boards:[...s.boards,{id:'b'+Date.now(),title:'Neues Board',subtitle:'Beschreibung hinzufügen'}]})),
+      boards:this.buildBoards(), onAddBoard:()=>{ const nb={id:'b'+Date.now()+Math.floor(Math.random()*1e4),title:'Neues Board',subtitle:'Beschreibung hinzufügen'}; this.setState(s=>({boards:[...s.boards,nb]})); if(window.AeroAPI) AeroAPI.createBoard(nb); },
       tl:this.buildTimeline(), cal:this.buildCalendar(), cap:this.buildCapacity(),
       teamCards:this.buildTeam(), onAddPerson:()=>this.openPerson(null),
       showModal:!!m, m:m||{},

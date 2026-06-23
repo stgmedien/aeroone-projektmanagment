@@ -8,7 +8,8 @@ export const SCOPES = [
   'openid',
   'https://www.googleapis.com/auth/userinfo.email',
   'https://www.googleapis.com/auth/userinfo.profile',
-  'https://www.googleapis.com/auth/calendar.events',
+  // Calendar scope is added in the Calendar step:
+  // 'https://www.googleapis.com/auth/calendar.events',
 ];
 
 export function redirectUri(req) {

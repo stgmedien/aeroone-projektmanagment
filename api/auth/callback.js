@@ -6,6 +6,7 @@ import { oauthClient } from '../_lib/google.js';
 import { isAllowed } from '../_lib/allowlist.js';
 import { createSession, SESSION_COOKIE, SESSION_MAX_AGE } from '../_lib/session.js';
 import { readCookies, setCookie, clearCookie, baseUrl, redirect } from '../_lib/http.js';
+import { db } from '../_lib/db.js';
 
 export default async function handler(req, res) {
   try {
@@ -39,8 +40,19 @@ export default async function handler(req, res) {
     });
     setCookie(res, SESSION_COOKIE, session, { maxAge: SESSION_MAX_AGE });
 
-    // TODO (persistence step): upsert the user row and store
-    // tokens.refresh_token (encrypted) for offline Google Calendar access.
+    // Record the login and link it to a Team person by email (if one matches).
+    // (tokens.refresh_token is persisted in the Calendar step.)
+    try {
+      const sql = db();
+      const rows = await sql`select id from people where lower(email)=lower(${p.email}) limit 1`;
+      const personId = rows[0]?.id || null;
+      await sql`insert into users (google_sub,email,name,picture,person_id,last_login_at)
+                values (${p.sub},${p.email},${p.name || ''},${p.picture || ''},${personId},now())
+                on conflict (email) do update set google_sub=excluded.google_sub, name=excluded.name,
+                  picture=excluded.picture, person_id=coalesce(users.person_id, excluded.person_id), last_login_at=now()`;
+    } catch (e) {
+      console.error('[auth/callback] user upsert failed', e);
+    }
 
     redirect(res, '/');
   } catch (e) {
